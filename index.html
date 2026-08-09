@@ -10,7 +10,6 @@
 
     <title>Frigo Famiglia</title>
 
-    <!-- Libreria lettura codici a barre -->
     <script
         src="https://unpkg.com/html5-qrcode"
         type="text/javascript">
@@ -21,19 +20,20 @@
 
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
             margin: 0;
             padding: 25px 15px;
             background: white;
+            color: #222;
         }
 
         h1 {
+            text-align: center;
             font-size: 42px;
             margin-bottom: 30px;
         }
 
         h2 {
-            margin-bottom: 20px;
+            text-align: center;
         }
 
         #reader {
@@ -43,29 +43,23 @@
         }
 
         #risultato {
+            text-align: center;
             margin-top: 25px;
         }
 
         #codice {
             font-size: 26px;
             font-weight: bold;
-            margin-top: 10px;
             word-break: break-all;
         }
 
         #prodotto {
-            margin: 30px auto;
+            margin: 25px auto;
             padding: 25px;
             border-radius: 15px;
             background: #f2f2f2;
             max-width: 500px;
-        }
-
-        #prodotto img {
-            max-width: 220px;
-            max-height: 220px;
-            border-radius: 10px;
-            margin-top: 20px;
+            text-align: center;
         }
 
         .nome-prodotto {
@@ -75,18 +69,18 @@
         }
 
         .dato {
-            font-size: 20px;
-            margin-top: 12px;
+            font-size: 19px;
+            margin-top: 10px;
         }
 
         .caricamento {
             font-size: 20px;
-            margin-top: 15px;
+            text-align: center;
         }
 
         .successo {
             color: #2e7d32;
-            font-size: 22px;
+            font-size: 23px;
             font-weight: bold;
         }
 
@@ -96,26 +90,105 @@
             font-weight: bold;
         }
 
-        .debug {
-            margin-top: 20px;
-            padding: 15px;
-            background: #e8e8e8;
+        #prodotto img {
+            max-width: 220px;
+            max-height: 220px;
             border-radius: 10px;
-            text-align: left;
-            font-size: 14px;
-            word-break: break-word;
+            margin-top: 20px;
         }
 
         button {
-            margin-top: 20px;
-            padding: 15px 25px;
-            font-size: 18px;
-            font-weight: bold;
             border: none;
             border-radius: 10px;
+            padding: 12px 20px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .nuova-scansione {
+            display: block;
+            margin: 20px auto;
             background: #1976d2;
             color: white;
-            cursor: pointer;
+        }
+
+        #frigo {
+            max-width: 700px;
+            margin: 40px auto;
+        }
+
+        .prodotto-frigo {
+            background: #f2f2f2;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .prodotto-frigo img {
+            width: 90px;
+            height: 90px;
+            object-fit: contain;
+            border-radius: 10px;
+            background: white;
+        }
+
+        .info-frigo {
+            flex: 1;
+            text-align: left;
+        }
+
+        .nome-frigo {
+            font-size: 21px;
+            font-weight: bold;
+        }
+
+        .marca-frigo {
+            margin-top: 5px;
+            font-size: 16px;
+        }
+
+        .quantita-frigo {
+            margin-top: 8px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .controlli {
+            margin-top: 10px;
+        }
+
+        .meno {
+            background: #e0e0e0;
+            margin-right: 5px;
+        }
+
+        .piu {
+            background: #1976d2;
+            color: white;
+        }
+
+        .elimina {
+            background: #c62828;
+            color: white;
+            margin-left: 5px;
+        }
+
+        .frigo-vuoto {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-size: 20px;
+        }
+
+        .aggiunto {
+            margin-top: 15px;
+            color: #2e7d32;
+            font-size: 20px;
+            font-weight: bold;
         }
 
     </style>
@@ -132,16 +205,12 @@
     <h2>📷 Inquadra il codice a barre</h2>
 
 
-    <!--
-        TELECAMERA
-    -->
+    <!-- SCANNER -->
 
     <div id="reader"></div>
 
 
-    <!--
-        CODICE LETTO
-    -->
+    <!-- CODICE LETTO -->
 
     <div id="risultato">
 
@@ -152,9 +221,7 @@
     </div>
 
 
-    <!--
-        RISULTATO PRODOTTO
-    -->
+    <!-- RISULTATO PRODOTTO -->
 
     <div id="prodotto">
 
@@ -167,12 +234,11 @@
     </div>
 
 
-    <!--
-        PULSANTE NUOVA SCANSIONE
-    -->
+    <!-- NUOVA SCANSIONE -->
 
     <button
         id="nuovaScansione"
+        class="nuova-scansione"
         onclick="nuovaScansione()"
         style="display:none;">
 
@@ -181,13 +247,25 @@
     </button>
 
 
+    <!-- ==================================================
+         FRIGORIFERO
+         ================================================== -->
+
+    <div id="frigo">
+
+        <h2>🧊 Il mio frigorifero</h2>
+
+        <div id="listaFrigo"></div>
+
+    </div>
+
 
     <script>
 
 
         /*
         ==================================================
-        VARIABILI
+        VARIABILI SCANNER
         ==================================================
         */
 
@@ -198,10 +276,454 @@
         let codiceGiaLetto = false;
 
 
+        /*
+        ==================================================
+        DATABASE LOCALE DEL FRIGO
+        ==================================================
+
+        I prodotti vengono salvati nel browser.
+
+        */
+
+        let frigo = JSON.parse(
+            localStorage.getItem("frigoFamiglia")
+        ) || [];
+
 
         /*
         ==================================================
-        AVVIO SCANNER
+        MOSTRA FRIGO
+        ==================================================
+        */
+
+        function mostraFrigo() {
+
+
+            const lista =
+                document.getElementById(
+                    "listaFrigo"
+                );
+
+
+            /*
+            Frigo vuoto
+            */
+
+            if (frigo.length === 0) {
+
+                lista.innerHTML =
+
+                    '<div class="frigo-vuoto">' +
+
+                    '🧊 Il frigorifero è vuoto.' +
+
+                    '<br><br>' +
+
+                    'Scansiona un prodotto per aggiungerlo.'
+
+                    +
+
+                    '</div>';
+
+                return;
+
+            }
+
+
+            /*
+            Costruiamo lista
+            */
+
+            let html = "";
+
+
+            frigo.forEach(
+                function (prodotto, indice) {
+
+
+                    html +=
+
+                        '<div class="prodotto-frigo">';
+
+
+                    /*
+                    Immagine
+                    */
+
+                    if (prodotto.immagine) {
+
+                        html +=
+
+                            '<img src="' +
+
+                            prodotto.immagine +
+
+                            '" ' +
+
+                            'alt="">' ;
+
+                    }
+
+                    else {
+
+                        html +=
+
+                            '<div style="' +
+
+                            'width:90px;' +
+
+                            'height:90px;' +
+
+                            'display:flex;' +
+
+                            'align-items:center;' +
+
+                            'justify-content:center;' +
+
+                            'font-size:45px;' +
+
+                            'background:white;' +
+
+                            'border-radius:10px;' +
+
+                            '">' +
+
+                            '🛒' +
+
+                            '</div>';
+
+                    }
+
+
+                    /*
+                    Informazioni
+                    */
+
+                    html +=
+
+                        '<div class="info-frigo">';
+
+
+                    html +=
+
+                        '<div class="nome-frigo">' +
+
+                        prodotto.nome +
+
+                        '</div>';
+
+
+                    html +=
+
+                        '<div class="marca-frigo">' +
+
+                        '🏷️ ' +
+
+                        prodotto.marca +
+
+                        '</div>';
+
+
+                    html +=
+
+                        '<div class="marca-frigo">' +
+
+                        '📦 Confezione: ' +
+
+                        prodotto.quantita +
+
+                        '</div>';
+
+
+                    html +=
+
+                        '<div class="quantita-frigo">' +
+
+                        '🧊 Nel frigo: ' +
+
+                        prodotto.quantitaFrigo +
+
+                        '</div>';
+
+
+                    /*
+                    Controlli
+                    */
+
+                    html +=
+
+                        '<div class="controlli">';
+
+
+                    html +=
+
+                        '<button ' +
+
+                        'class="meno" ' +
+
+                        'onclick="diminuisci(' +
+
+                        indice +
+
+                        ')">' +
+
+                        '➖' +
+
+                        '</button>';
+
+
+                    html +=
+
+                        '<button ' +
+
+                        'class="piu" ' +
+
+                        'onclick="aumenta(' +
+
+                        indice +
+
+                        ')">' +
+
+                        '➕' +
+
+                        '</button>';
+
+
+                    html +=
+
+                        '<button ' +
+
+                        'class="elimina" ' +
+
+                        'onclick="elimina(' +
+
+                        indice +
+
+                        ')">' +
+
+                        '🗑️' +
+
+                        '</button>';
+
+
+                    html +=
+
+                        '</div>';
+
+
+                    html +=
+
+                        '</div>';
+
+
+                    html +=
+
+                        '</div>';
+
+                }
+            );
+
+
+            lista.innerHTML = html;
+
+        }
+
+
+        /*
+        ==================================================
+        SALVA FRIGO
+        ==================================================
+        */
+
+        function salvaFrigo() {
+
+
+            localStorage.setItem(
+
+                "frigoFamiglia",
+
+                JSON.stringify(frigo)
+
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        AGGIUNGI PRODOTTO AL FRIGO
+        ==================================================
+        */
+
+        function aggiungiAlFrigo(prodotto) {
+
+
+            /*
+            Cerchiamo se il prodotto
+            è già presente.
+
+            Usiamo il codice EAN.
+            */
+
+            const esistente =
+                frigo.find(
+                    function (elemento) {
+
+                        return elemento.codice ===
+                            prodotto.codice;
+
+                    }
+                );
+
+
+            /*
+            ==================================================
+            PRODOTTO GIÀ PRESENTE
+            ==================================================
+            */
+
+            if (esistente) {
+
+                esistente.quantitaFrigo++;
+
+            }
+
+
+            /*
+            ==================================================
+            NUOVO PRODOTTO
+            ==================================================
+            */
+
+            else {
+
+                frigo.push({
+
+                    codice:
+                        prodotto.codice,
+
+                    nome:
+                        prodotto.nome,
+
+                    marca:
+                        prodotto.marca,
+
+                    quantita:
+                        prodotto.quantita,
+
+                    categoria:
+                        prodotto.categoria,
+
+                    immagine:
+                        prodotto.immagine,
+
+                    quantitaFrigo:
+                        1
+
+                });
+
+            }
+
+
+            /*
+            Salviamo
+            */
+
+            salvaFrigo();
+
+
+            /*
+            Aggiorniamo visualizzazione
+            */
+
+            mostraFrigo();
+
+        }
+
+
+        /*
+        ==================================================
+        AUMENTA QUANTITÀ
+        ==================================================
+        */
+
+        function aumenta(indice) {
+
+
+            frigo[indice].quantitaFrigo++;
+
+
+            salvaFrigo();
+
+            mostraFrigo();
+
+        }
+
+
+        /*
+        ==================================================
+        DIMINUISCI QUANTITÀ
+        ==================================================
+        */
+
+        function diminuisci(indice) {
+
+
+            if (
+                frigo[indice].quantitaFrigo > 1
+            ) {
+
+                frigo[indice].quantitaFrigo--;
+
+            }
+
+            else {
+
+                /*
+                Se arriva a zero,
+                eliminiamo il prodotto.
+                */
+
+                frigo.splice(
+                    indice,
+                    1
+                );
+
+            }
+
+
+            salvaFrigo();
+
+            mostraFrigo();
+
+        }
+
+
+        /*
+        ==================================================
+        ELIMINA PRODOTTO
+        ==================================================
+        */
+
+        function elimina(indice) {
+
+
+            frigo.splice(
+                indice,
+                1
+            );
+
+
+            salvaFrigo();
+
+            mostraFrigo();
+
+        }
+
+
+        /*
+        ==================================================
+        AVVIA SCANNER
         ==================================================
         */
 
@@ -209,7 +731,7 @@
 
 
             console.log(
-                "AVVIO SCANNER"
+                "Avvio scanner..."
             );
 
 
@@ -218,17 +740,9 @@
             scansioneInCorso = true;
 
 
-            /*
-            Creiamo nuovo scanner
-            */
-
             scanner =
                 new Html5Qrcode("reader");
 
-
-            /*
-            Configurazione
-            */
 
             const configurazione = {
 
@@ -244,10 +758,6 @@
             };
 
 
-            /*
-            Avvio fotocamera posteriore
-            */
-
             scanner.start(
 
                 {
@@ -261,8 +771,7 @@
                 function () {
 
                     /*
-                    Errori normali di scansione
-                    ignorati.
+                    Errori normali ignorati.
                     */
 
                 }
@@ -272,7 +781,7 @@
             .then(function () {
 
                 console.log(
-                    "FOTOCAMERA AVVIATA"
+                    "Fotocamera avviata"
                 );
 
             })
@@ -280,7 +789,7 @@
             .catch(function (errore) {
 
                 console.error(
-                    "ERRORE FOTOCAMERA:",
+                    "Errore fotocamera:",
                     errore
                 );
 
@@ -307,18 +816,20 @@
         }
 
 
-
         /*
         ==================================================
         CODICE LETTO
         ==================================================
         */
 
-        function codiceLetto(decodedText, decodedResult) {
+        function codiceLetto(
+            decodedText,
+            decodedResult
+        ) {
 
 
             /*
-            Evitiamo letture duplicate
+            Evitiamo doppia lettura
             */
 
             if (codiceGiaLetto) {
@@ -332,7 +843,7 @@
 
 
             console.log(
-                "CODICE LETTO:",
+                "Codice letto:",
                 decodedText
             );
 
@@ -347,7 +858,7 @@
 
 
             /*
-            Mostriamo subito il messaggio
+            Messaggio
             */
 
             document.getElementById(
@@ -356,9 +867,9 @@
 
                 '<div class="caricamento">' +
 
-                '🔎 Codice letto!<br><br>' +
+                '🔎 Cerco il prodotto...' +
 
-                '🌐 Cerco il prodotto su Open Food Facts...<br><br>' +
+                '<br><br>' +
 
                 '<strong>' +
 
@@ -385,7 +896,6 @@
         }
 
 
-
         /*
         ==================================================
         FERMA SCANNER
@@ -407,7 +917,7 @@
                     await scanner.clear();
 
                     console.log(
-                        "SCANNER FERMATO"
+                        "Scanner fermato"
                     );
 
                 }
@@ -415,18 +925,18 @@
                 catch (errore) {
 
                     console.error(
-                        "ERRORE FERMATA SCANNER:",
+                        "Errore scanner:",
                         errore
                     );
 
                 }
+
 
                 scansioneInCorso = false;
 
             }
 
         }
-
 
 
         /*
@@ -445,7 +955,7 @@
 
 
             /*
-            API V3 OPEN FOOD FACTS
+            API OPEN FOOD FACTS V3
             */
 
             const url =
@@ -491,31 +1001,11 @@
 
 
                 /*
-                ==================================================
-                CHIAMATA API
-                ==================================================
+                Chiamata API
                 */
 
                 const risposta =
-
-                    await fetch(
-
-                        url,
-
-                        {
-
-                            method: "GET",
-
-                            headers: {
-
-                                "User-Agent":
-                                    "FrigoFamiglia/1.0 (GitHub Pages)"
-
-                            }
-
-                        }
-
-                    );
+                    await fetch(url);
 
 
                 console.log(
@@ -523,12 +1013,6 @@
                     risposta.status
                 );
 
-
-                /*
-                ==================================================
-                CONTROLLO RISPOSTA
-                ==================================================
-                */
 
                 if (!risposta.ok) {
 
@@ -541,9 +1025,7 @@
 
 
                 /*
-                ==================================================
                 JSON
-                ==================================================
                 */
 
                 const dati =
@@ -551,20 +1033,18 @@
 
 
                 console.log(
-                    "RISPOSTA OPEN FOOD FACTS:",
+                    "Dati ricevuti:",
                     dati
                 );
 
 
                 /*
                 ==================================================
-                CONTROLLO PRODOTTO
+                PRODOTTO NON TROVATO
                 ==================================================
                 */
 
-                if (
-                    !dati.product
-                ) {
+                if (!dati.product) {
 
 
                     contenitore.innerHTML =
@@ -573,29 +1053,11 @@
 
                         '❌ Prodotto non trovato' +
 
-                        '</div>' +
-
-                        '<div class="debug">' +
-
-                        '<strong>Diagnostica</strong>' +
-
                         '<br><br>' +
 
                         'Codice: ' +
 
                         codice +
-
-                        '<br>' +
-
-                        'HTTP: ' +
-
-                        risposta.status +
-
-                        '<br><br>' +
-
-                        'Open Food Facts non ha restituito un prodotto per questo codice.'
-
-                        +
 
                         '</div>';
 
@@ -608,10 +1070,9 @@
                 }
 
 
-
                 /*
                 ==================================================
-                PRODOTTO
+                DATI PRODOTTO
                 ==================================================
                 */
 
@@ -619,11 +1080,8 @@
                     dati.product;
 
 
-
                 /*
-                ==================================================
-                NOME
-                ==================================================
+                Nome
                 */
 
                 const nome =
@@ -635,11 +1093,8 @@
                     "Nome non disponibile";
 
 
-
                 /*
-                ==================================================
-                MARCA
-                ==================================================
+                Marca
                 */
 
                 const marca =
@@ -649,22 +1104,13 @@
                     "Marca non disponibile";
 
 
-
                 /*
-                ==================================================
-                QUANTITÀ
-                ==================================================
+                Quantità confezione
                 */
 
                 let quantita =
-
                     prodotto.quantity || "";
 
-
-                /*
-                Se quantity non esiste,
-                proviamo product_quantity
-                */
 
                 if (!quantita) {
 
@@ -694,11 +1140,8 @@
                 }
 
 
-
                 /*
-                ==================================================
-                CATEGORIA
-                ==================================================
+                Categoria
                 */
 
                 const categoria =
@@ -708,11 +1151,8 @@
                     "Categoria non disponibile";
 
 
-
                 /*
-                ==================================================
-                IMMAGINE
-                ==================================================
+                Immagine
                 */
 
                 const immagine =
@@ -722,10 +1162,38 @@
                     "";
 
 
+                /*
+                ==================================================
+                AGGIUNGI AUTOMATICAMENTE AL FRIGO
+                ==================================================
+                */
+
+                aggiungiAlFrigo({
+
+                    codice:
+                        codice,
+
+                    nome:
+                        nome,
+
+                    marca:
+                        marca,
+
+                    quantita:
+                        quantita,
+
+                    categoria:
+                        categoria,
+
+                    immagine:
+                        immagine
+
+                });
+
 
                 /*
                 ==================================================
-                VISUALIZZAZIONE
+                MOSTRA RISULTATO
                 ==================================================
                 */
 
@@ -756,7 +1224,7 @@
 
                     '<div class="dato">' +
 
-                    '🏷️ Marca: ' +
+                    '🏷️ ' +
 
                     marca +
 
@@ -767,20 +1235,9 @@
 
                     '<div class="dato">' +
 
-                    '📦 Quantità: ' +
+                    '📦 Confezione: ' +
 
                     quantita +
-
-                    '</div>';
-
-
-                html +=
-
-                    '<div class="dato">' +
-
-                    '🥫 Categoria: ' +
-
-                    categoria +
 
                     '</div>';
 
@@ -796,19 +1253,24 @@
                     '</div>';
 
 
+                html +=
+
+                    '<div class="aggiunto">' +
+
+                    '🧊 AGGIUNTO AL FRIGO ✅' +
+
+                    '</div>';
+
+
                 /*
-                ==================================================
-                IMMAGINE
-                ==================================================
+                Immagine
                 */
 
                 if (immagine) {
 
                     html +=
 
-                        '<img ' +
-
-                        'src="' +
+                        '<img src="' +
 
                         immagine +
 
@@ -819,34 +1281,13 @@
                 }
 
 
-                /*
-                Inseriamo risultato
-                */
-
                 contenitore.innerHTML =
                     html;
 
 
-                console.log(
-                    "NOME:",
-                    nome
-                );
-
-                console.log(
-                    "MARCA:",
-                    marca
-                );
-
-                console.log(
-                    "QUANTITA:",
-                    quantita
-                );
-
-                console.log(
-                    "CATEGORIA:",
-                    categoria
-                );
-
+                /*
+                Pulsante
+                */
 
                 mostraPulsante();
 
@@ -857,7 +1298,7 @@
 
 
                 console.error(
-                    "ERRORE API:",
+                    "Errore API:",
                     errore
                 );
 
@@ -867,18 +1308,6 @@
                     '<div class="errore">' +
 
                     '⚠️ Errore durante la ricerca' +
-
-                    '</div>' +
-
-                    '<div class="debug">' +
-
-                    '<strong>Dettagli tecnici</strong>' +
-
-                    '<br><br>' +
-
-                    'Codice: ' +
-
-                    codice +
 
                     '<br><br>' +
 
@@ -894,7 +1323,6 @@
         }
 
 
-
         /*
         ==================================================
         MOSTRA PULSANTE
@@ -906,10 +1334,9 @@
             document.getElementById(
                 "nuovaScansione"
             ).style.display =
-                "inline-block";
+                "block";
 
         }
-
 
 
         /*
@@ -945,18 +1372,10 @@
                 "none";
 
 
-            /*
-            Puliamo reader
-            */
-
             document.getElementById(
                 "reader"
             ).innerHTML = "";
 
-
-            /*
-            Riavviamo
-            */
 
             setTimeout(
                 avviaScanner,
@@ -966,10 +1385,18 @@
         }
 
 
+        /*
+        ==================================================
+        MOSTRIAMO IL FRIGO ALL'AVVIO
+        ==================================================
+        */
+
+        mostraFrigo();
+
 
         /*
         ==================================================
-        AVVIO AUTOMATICO
+        AVVIAMO LO SCANNER
         ==================================================
         */
 
