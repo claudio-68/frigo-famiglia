@@ -10,10 +10,12 @@
 
     <title>Frigo Famiglia</title>
 
+    <!-- Libreria lettura codici a barre -->
     <script
         src="https://unpkg.com/html5-qrcode"
         type="text/javascript">
     </script>
+
 
     <style>
 
@@ -21,7 +23,7 @@
             font-family: Arial, sans-serif;
             text-align: center;
             margin: 0;
-            padding: 30px 15px;
+            padding: 25px 15px;
             background: white;
         }
 
@@ -31,7 +33,7 @@
         }
 
         h2 {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         #reader {
@@ -41,8 +43,7 @@
         }
 
         #risultato {
-            margin-top: 30px;
-            font-size: 22px;
+            margin-top: 25px;
         }
 
         #codice {
@@ -53,13 +54,11 @@
         }
 
         #prodotto {
-            margin-top: 30px;
+            margin: 30px auto;
             padding: 25px;
             border-radius: 15px;
             background: #f2f2f2;
             max-width: 500px;
-            margin-left: auto;
-            margin-right: auto;
         }
 
         #prodotto img {
@@ -72,33 +71,43 @@
         .nome-prodotto {
             font-size: 28px;
             font-weight: bold;
-            margin-top: 10px;
+            margin-top: 15px;
         }
 
-        .marca {
+        .dato {
             font-size: 20px;
             margin-top: 12px;
         }
 
         .caricamento {
             font-size: 20px;
-            margin-top: 10px;
-        }
-
-        .errore {
-            color: #c62828;
-            font-weight: bold;
-            font-size: 20px;
+            margin-top: 15px;
         }
 
         .successo {
             color: #2e7d32;
+            font-size: 22px;
             font-weight: bold;
-            font-size: 20px;
         }
 
-        .pulsante {
-            margin-top: 25px;
+        .errore {
+            color: #c62828;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .debug {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8e8e8;
+            border-radius: 10px;
+            text-align: left;
+            font-size: 14px;
+            word-break: break-word;
+        }
+
+        button {
+            margin-top: 20px;
             padding: 15px 25px;
             font-size: 18px;
             font-weight: bold;
@@ -107,10 +116,6 @@
             background: #1976d2;
             color: white;
             cursor: pointer;
-        }
-
-        .pulsante:hover {
-            background: #1565c0;
         }
 
     </style>
@@ -127,12 +132,16 @@
     <h2>📷 Inquadra il codice a barre</h2>
 
 
-    <!-- SCANNER -->
+    <!--
+        TELECAMERA
+    -->
 
     <div id="reader"></div>
 
 
-    <!-- RISULTATO CODICE -->
+    <!--
+        CODICE LETTO
+    -->
 
     <div id="risultato">
 
@@ -143,22 +152,34 @@
     </div>
 
 
-    <!-- PRODOTTO -->
+    <!--
+        RISULTATO PRODOTTO
+    -->
 
-    <div id="prodotto"></div>
+    <div id="prodotto">
+
+        <div class="caricamento">
+
+            📷 In attesa di una scansione...
+
+        </div>
+
+    </div>
 
 
-    <!-- PULSANTE NUOVA SCANSIONE -->
+    <!--
+        PULSANTE NUOVA SCANSIONE
+    -->
 
     <button
         id="nuovaScansione"
-        class="pulsante"
-        onclick="avviaScanner()"
+        onclick="nuovaScansione()"
         style="display:none;">
 
         📷 Scansiona un altro prodotto
 
     </button>
+
 
 
     <script>
@@ -172,14 +193,15 @@
 
         let scanner = null;
 
-        let scannerAttivo = false;
+        let scansioneInCorso = false;
 
         let codiceGiaLetto = false;
 
 
+
         /*
         ==================================================
-        AVVIA SCANNER
+        AVVIO SCANNER
         ==================================================
         */
 
@@ -187,44 +209,25 @@
 
 
             console.log(
-                "Avvio scanner..."
+                "AVVIO SCANNER"
             );
 
 
-            /*
-            Se esiste già uno scanner,
-            lo ricreiamo da zero.
-            */
-
-            scanner = new Html5Qrcode("reader");
-
-
-            scannerAttivo = true;
-
             codiceGiaLetto = false;
 
+            scansioneInCorso = true;
+
 
             /*
-            Puliamo i risultati precedenti
+            Creiamo nuovo scanner
             */
 
-            document.getElementById(
-                "codice"
-            ).innerText = "";
-
-
-            document.getElementById(
-                "prodotto"
-            ).innerHTML = "";
-
-
-            document.getElementById(
-                "nuovaScansione"
-            ).style.display = "none";
+            scanner =
+                new Html5Qrcode("reader");
 
 
             /*
-            Configurazione scanner
+            Configurazione
             */
 
             const configurazione = {
@@ -242,7 +245,7 @@
 
 
             /*
-            Avviamo fotocamera posteriore
+            Avvio fotocamera posteriore
             */
 
             scanner.start(
@@ -255,35 +258,34 @@
 
                 codiceLetto,
 
-                function (errore) {
+                function () {
 
                     /*
-                    Gli errori normali durante
-                    la ricerca del codice
-                    vengono ignorati.
+                    Errori normali di scansione
+                    ignorati.
                     */
 
                 }
 
             )
 
-            .then(() => {
+            .then(function () {
 
                 console.log(
-                    "Scanner avviato correttamente"
+                    "FOTOCAMERA AVVIATA"
                 );
 
             })
 
-            .catch((errore) => {
+            .catch(function (errore) {
 
                 console.error(
-                    "Errore avvio scanner:",
+                    "ERRORE FOTOCAMERA:",
                     errore
                 );
 
 
-                scannerAttivo = false;
+                scansioneInCorso = false;
 
 
                 document.getElementById(
@@ -305,6 +307,7 @@
         }
 
 
+
         /*
         ==================================================
         CODICE LETTO
@@ -315,9 +318,7 @@
 
 
             /*
-            Evitiamo che lo scanner
-            legga lo stesso codice
-            molte volte.
+            Evitiamo letture duplicate
             */
 
             if (codiceGiaLetto) {
@@ -346,19 +347,43 @@
 
 
             /*
-            Fermiamo la fotocamera
+            Mostriamo subito il messaggio
+            */
+
+            document.getElementById(
+                "prodotto"
+            ).innerHTML =
+
+                '<div class="caricamento">' +
+
+                '🔎 Codice letto!<br><br>' +
+
+                '🌐 Cerco il prodotto su Open Food Facts...<br><br>' +
+
+                '<strong>' +
+
+                decodedText +
+
+                '</strong>' +
+
+                '</div>';
+
+
+            /*
+            Fermiamo scanner
             */
 
             fermaScanner();
 
 
             /*
-            Cerchiamo il prodotto
+            Cerchiamo prodotto
             */
 
             cercaProdotto(decodedText);
 
         }
+
 
 
         /*
@@ -367,41 +392,41 @@
         ==================================================
         */
 
-        function fermaScanner() {
+        async function fermaScanner() {
 
 
             if (
                 scanner &&
-                scannerAttivo
+                scansioneInCorso
             ) {
 
+                try {
 
-                scanner.clear()
+                    await scanner.stop();
 
-                    .then(() => {
+                    await scanner.clear();
 
-                        console.log(
-                            "Scanner fermato"
-                        );
+                    console.log(
+                        "SCANNER FERMATO"
+                    );
 
-                        scannerAttivo = false;
+                }
 
-                    })
+                catch (errore) {
 
-                    .catch((errore) => {
+                    console.error(
+                        "ERRORE FERMATA SCANNER:",
+                        errore
+                    );
 
-                        console.error(
-                            "Errore arresto scanner:",
-                            errore
-                        );
+                }
 
-                        scannerAttivo = false;
-
-                    });
+                scansioneInCorso = false;
 
             }
 
         }
+
 
 
         /*
@@ -420,22 +445,46 @@
 
 
             /*
-            Messaggio caricamento
+            API V3 OPEN FOOD FACTS
             */
 
-            contenitore.innerHTML =
+            const url =
 
-                '<div class="caricamento">' +
+                "https://world.openfoodfacts.org/api/v3/product/" +
 
-                '🔎 Cerco il prodotto...' +
+                encodeURIComponent(codice) +
 
-                '<br><br>' +
+                "?product_type=food" +
 
-                'Codice: ' +
+                "&cc=it" +
 
-                codice +
+                "&lc=it" +
 
-                '</div>';
+                "&fields=" +
+
+                "code," +
+
+                "product_name," +
+
+                "product_name_it," +
+
+                "brands," +
+
+                "quantity," +
+
+                "product_quantity," +
+
+                "product_quantity_unit," +
+
+                "categories," +
+
+                "image_front_url";
+
+
+            console.log(
+                "URL API:",
+                url
+            );
 
 
             try {
@@ -443,45 +492,30 @@
 
                 /*
                 ==================================================
-                URL OPEN FOOD FACTS
+                CHIAMATA API
                 ==================================================
                 */
 
-                const url =
-
-                    "https://world.openfoodfacts.org/api/v2/product/" +
-
-                    encodeURIComponent(codice) +
-
-                    "?fields=" +
-
-                    "code," +
-
-                    "product_name," +
-
-                    "product_name_it," +
-
-                    "brands," +
-
-                    "quantity," +
-
-                    "categories," +
-
-                    "image_front_url";
-
-
-                console.log(
-                    "Chiamata API:",
-                    url
-                );
-
-
-                /*
-                Chiamata al database
-                */
-
                 const risposta =
-                    await fetch(url);
+
+                    await fetch(
+
+                        url,
+
+                        {
+
+                            method: "GET",
+
+                            headers: {
+
+                                "User-Agent":
+                                    "FrigoFamiglia/1.0 (GitHub Pages)"
+
+                            }
+
+                        }
+
+                    );
 
 
                 console.log(
@@ -491,13 +525,15 @@
 
 
                 /*
-                Controlliamo risposta
+                ==================================================
+                CONTROLLO RISPOSTA
+                ==================================================
                 */
 
                 if (!risposta.ok) {
 
                     throw new Error(
-                        "Errore HTTP " +
+                        "HTTP " +
                         risposta.status
                     );
 
@@ -505,7 +541,9 @@
 
 
                 /*
-                Convertiamo risposta
+                ==================================================
+                JSON
+                ==================================================
                 */
 
                 const dati =
@@ -513,19 +551,18 @@
 
 
                 console.log(
-                    "DATI RICEVUTI:",
+                    "RISPOSTA OPEN FOOD FACTS:",
                     dati
                 );
 
 
                 /*
                 ==================================================
-                PRODOTTO NON TROVATO
+                CONTROLLO PRODOTTO
                 ==================================================
                 */
 
                 if (
-                    dati.status !== 1 ||
                     !dati.product
                 ) {
 
@@ -536,9 +573,11 @@
 
                         '❌ Prodotto non trovato' +
 
-                        '<br><br>' +
+                        '</div>' +
 
-                        'Il codice è stato letto correttamente.' +
+                        '<div class="debug">' +
+
+                        '<strong>Diagnostica</strong>' +
 
                         '<br><br>' +
 
@@ -546,19 +585,33 @@
 
                         codice +
 
+                        '<br>' +
+
+                        'HTTP: ' +
+
+                        risposta.status +
+
+                        '<br><br>' +
+
+                        'Open Food Facts non ha restituito un prodotto per questo codice.'
+
+                        +
+
                         '</div>';
 
 
                     mostraPulsante();
+
 
                     return;
 
                 }
 
 
+
                 /*
                 ==================================================
-                PRODOTTO TROVATO
+                PRODOTTO
                 ==================================================
                 */
 
@@ -566,8 +619,11 @@
                     dati.product;
 
 
+
                 /*
-                Nome
+                ==================================================
+                NOME
+                ==================================================
                 */
 
                 const nome =
@@ -579,8 +635,11 @@
                     "Nome non disponibile";
 
 
+
                 /*
-                Marca
+                ==================================================
+                MARCA
+                ==================================================
                 */
 
                 const marca =
@@ -590,19 +649,56 @@
                     "Marca non disponibile";
 
 
+
                 /*
-                Quantità
+                ==================================================
+                QUANTITÀ
+                ==================================================
                 */
 
-                const quantita =
+                let quantita =
 
-                    prodotto.quantity ||
-
-                    "Quantità non disponibile";
+                    prodotto.quantity || "";
 
 
                 /*
-                Categoria
+                Se quantity non esiste,
+                proviamo product_quantity
+                */
+
+                if (!quantita) {
+
+                    if (
+                        prodotto.product_quantity &&
+                        prodotto.product_quantity_unit
+                    ) {
+
+                        quantita =
+
+                            prodotto.product_quantity +
+
+                            " " +
+
+                            prodotto.product_quantity_unit;
+
+                    }
+
+                }
+
+
+                if (!quantita) {
+
+                    quantita =
+                        "Quantità non disponibile";
+
+                }
+
+
+
+                /*
+                ==================================================
+                CATEGORIA
+                ==================================================
                 */
 
                 const categoria =
@@ -612,8 +708,11 @@
                     "Categoria non disponibile";
 
 
+
                 /*
-                Immagine
+                ==================================================
+                IMMAGINE
+                ==================================================
                 */
 
                 const immagine =
@@ -623,9 +722,10 @@
                     "";
 
 
+
                 /*
                 ==================================================
-                CREIAMO RISULTATO
+                VISUALIZZAZIONE
                 ==================================================
                 */
 
@@ -654,9 +754,9 @@
 
                 html +=
 
-                    '<div class="marca">' +
+                    '<div class="dato">' +
 
-                    '🏷️ ' +
+                    '🏷️ Marca: ' +
 
                     marca +
 
@@ -665,7 +765,7 @@
 
                 html +=
 
-                    '<div class="marca">' +
+                    '<div class="dato">' +
 
                     '📦 Quantità: ' +
 
@@ -676,7 +776,7 @@
 
                 html +=
 
-                    '<div class="marca">' +
+                    '<div class="dato">' +
 
                     '🥫 Categoria: ' +
 
@@ -687,7 +787,7 @@
 
                 html +=
 
-                    '<div style="margin-top:15px;">' +
+                    '<div class="dato">' +
 
                     '🔢 Codice: ' +
 
@@ -697,14 +797,18 @@
 
 
                 /*
-                Immagine
+                ==================================================
+                IMMAGINE
+                ==================================================
                 */
 
                 if (immagine) {
 
                     html +=
 
-                        '<img src="' +
+                        '<img ' +
+
+                        'src="' +
 
                         immagine +
 
@@ -716,18 +820,35 @@
 
 
                 /*
-                Mostriamo prodotto
+                Inseriamo risultato
                 */
 
-                contenitore.innerHTML = html;
+                contenitore.innerHTML =
+                    html;
 
 
-                /*
-                Mostriamo pulsante
-                */
+                console.log(
+                    "NOME:",
+                    nome
+                );
+
+                console.log(
+                    "MARCA:",
+                    marca
+                );
+
+                console.log(
+                    "QUANTITA:",
+                    quantita
+                );
+
+                console.log(
+                    "CATEGORIA:",
+                    categoria
+                );
+
 
                 mostraPulsante();
-
 
             }
 
@@ -745,7 +866,19 @@
 
                     '<div class="errore">' +
 
-                    '⚠️ Errore nel collegamento a Open Food Facts' +
+                    '⚠️ Errore durante la ricerca' +
+
+                    '</div>' +
+
+                    '<div class="debug">' +
+
+                    '<strong>Dettagli tecnici</strong>' +
+
+                    '<br><br>' +
+
+                    'Codice: ' +
+
+                    codice +
 
                     '<br><br>' +
 
@@ -761,6 +894,7 @@
         }
 
 
+
         /*
         ==================================================
         MOSTRA PULSANTE
@@ -771,9 +905,66 @@
 
             document.getElementById(
                 "nuovaScansione"
-            ).style.display = "inline-block";
+            ).style.display =
+                "inline-block";
 
         }
+
+
+
+        /*
+        ==================================================
+        NUOVA SCANSIONE
+        ==================================================
+        */
+
+        function nuovaScansione() {
+
+
+            document.getElementById(
+                "codice"
+            ).innerText = "";
+
+
+            document.getElementById(
+                "prodotto"
+            ).innerHTML =
+
+                '<div class="caricamento">' +
+
+                '📷 In attesa di una nuova scansione...'
+
+                +
+
+                '</div>';
+
+
+            document.getElementById(
+                "nuovaScansione"
+            ).style.display =
+                "none";
+
+
+            /*
+            Puliamo reader
+            */
+
+            document.getElementById(
+                "reader"
+            ).innerHTML = "";
+
+
+            /*
+            Riavviamo
+            */
+
+            setTimeout(
+                avviaScanner,
+                300
+            );
+
+        }
+
 
 
         /*
