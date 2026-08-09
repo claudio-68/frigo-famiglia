@@ -242,7 +242,12 @@
             Cerchiamo il prodotto
             */
 
-            cercaProdotto(decodedText);
+            document.getElementById("prodotto").innerHTML =
+    "<h2>🔎 Codice ricevuto:</h2>" +
+    "<p>" + decodedText + "</p>" +
+    "<p>Ora provo a contattare Open Food Facts...</p>";
+
+cercaProdotto(decodedText);
 
         }
 
