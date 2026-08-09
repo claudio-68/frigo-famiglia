@@ -3,31 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Frigo Famiglia</title>
 
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <style>
+
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            padding: 20px;
+            margin: 0;
+            padding: 30px 15px;
+            background: white;
         }
 
         h1 {
-            margin-bottom: 30px;
+            font-size: 42px;
+            margin-bottom: 50px;
         }
 
         #reader {
+            width: 100%;
             max-width: 500px;
             margin: auto;
         }
 
-        #result {
-            margin-top: 25px;
+        #risultato {
+            margin-top: 30px;
             font-size: 22px;
+        }
+
+        #prodotto {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 15px;
+            background: #f2f2f2;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #prodotto img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .nome-prodotto {
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .marca {
+            font-size: 20px;
+            margin-top: 10px;
+        }
+
+        .caricamento {
+            font-size: 20px;
+            margin-top: 20px;
+        }
+
+        .errore {
+            color: #c62828;
             font-weight: bold;
         }
+
     </style>
 </head>
 
@@ -35,67 +79,181 @@
 
     <h1>🥶 Frigo Famiglia</h1>
 
-    <p>📷 Inquadra il codice a barre</p>
+    <h2>📷 Inquadra il codice a barre</h2>
 
     <div id="reader"></div>
 
-    <div id="result">
-        Nessun prodotto scansionato
+    <div id="risultato">
+        <h2>✅ Codice trovato:</h2>
+        <div id="codice"></div>
     </div>
 
+    <div id="prodotto"></div>
+
+
     <script>
-        let html5QrCode;
 
-        async function startScanner() {
+        // Questa funzione viene eseguita quando
+        // lo scanner riconosce un codice a barre
+        function codiceLetto(decodedText, decodedResult) {
 
-            html5QrCode = new Html5Qrcode("reader");
+            console.log("Codice letto:", decodedText);
 
-            const config = {
-                fps: 10,
-                qrbox: {
-                    width: 300,
-                    height: 150
-                },
-                formatsToSupport: [
-                    Html5QrcodeSupportedFormats.EAN_13,
-                    Html5QrcodeSupportedFormats.EAN_8,
-                    Html5QrcodeSupportedFormats.UPC_A,
-                    Html5QrcodeSupportedFormats.UPC_E
-                ]
-            };
+            // Mostriamo il codice sullo schermo
+            document.getElementById("codice").innerText = decodedText;
+
+            // Fermiamo lo scanner
+            scanner.clear();
+
+            // Cerchiamo il prodotto
+            cercaProdotto(decodedText);
+        }
+
+
+        // Cerca il prodotto su Open Food Facts
+        async function cercaProdotto(codice) {
+
+            const contenitore = document.getElementById("prodotto");
+
+            contenitore.innerHTML =
+                '<div class="caricamento">🔎 Cerco il prodotto...</div>';
 
             try {
 
-                await html5QrCode.start(
-                    { facingMode: "environment" },
-                    config,
-                    onScanSuccess,
-                    onScanFailure
-                );
+                const url =
+                    "https://world.openfoodfacts.org/api/v3/product/"
+                    + codice
+                    + ".json";
 
-            } catch (err) {
+                const risposta = await fetch(url);
 
-                document.getElementById("result").innerHTML =
-                    "❌ Impossibile avviare la fotocamera";
+                if (!risposta.ok) {
+                    throw new Error("Errore nella risposta del server");
+                }
 
-                console.error(err);
+                const dati = await risposta.json();
+
+                console.log("Risposta Open Food Facts:", dati);
+
+                // Controlliamo se il prodotto esiste
+                if (dati.status !== 1 || !dati.product) {
+
+                    contenitore.innerHTML =
+                        '<div class="errore">' +
+                        '❌ Prodotto non trovato<br><br>' +
+                        'Il codice è presente, ma non è ancora nel database.' +
+                        '</div>';
+
+                    return;
+                }
+
+                const prodotto = dati.product;
+
+                // Nome del prodotto
+                const nome =
+                    prodotto.product_name_it ||
+                    prodotto.product_name ||
+                    "Nome non disponibile";
+
+                // Marca
+                const marca =
+                    prodotto.brands ||
+                    "Marca non disponibile";
+
+                // Immagine
+                const immagine =
+                    prodotto.image_front_url || "";
+
+                let html = "";
+
+                html += '<div class="nome-prodotto">';
+                html += '🛒 ' + nome;
+                html += '</div>';
+
+                html += '<div class="marca">';
+                html += '🏷️ ' + marca;
+                html += '</div>';
+
+                html += '<div style="margin-top:15px;">';
+                html += '🔢 Codice: ' + codice;
+                html += '</div>';
+
+                if (immagine) {
+
+                    html += '<img src="' +
+                        immagine +
+                        '" alt="Immagine prodotto">';
+                }
+
+                contenitore.innerHTML = html;
+
+            } catch (errore) {
+
+                console.error(errore);
+
+                contenitore.innerHTML =
+                    '<div class="errore">' +
+                    '⚠️ Non riesco a contattare Open Food Facts.' +
+                    '<br><br>' +
+                    'Controlla la connessione Internet.' +
+                    '</div>';
             }
         }
 
-        function onScanSuccess(decodedText, decodedResult) {
 
-            document.getElementById("result").innerHTML =
-                "✅ Codice trovato:<br><br>" + decodedText;
+        // Creiamo lo scanner
+        const scanner = new Html5Qrcode("reader");
 
-            html5QrCode.stop();
-        }
 
-        function onScanFailure(error) {
-            // Ignoriamo gli errori durante la ricerca del codice
-        }
+        // Configurazione dello scanner
+        const configurazione = {
 
-        startScanner();
+            fps: 10,
+
+            qrbox: {
+                width: 300,
+                height: 150
+            },
+
+            aspectRatio: 1.777778
+
+        };
+
+
+        // Avviamo la fotocamera
+        scanner.start(
+
+            {
+                facingMode: "environment"
+            },
+
+            configurazione,
+
+            codiceLetto,
+
+            function (errore) {
+
+                // Gli errori di scansione normali
+                // non vengono mostrati all'utente
+            }
+
+        ).catch(function (errore) {
+
+            console.error(
+                "Errore avvio fotocamera:",
+                errore
+            );
+
+            document.getElementById("reader").innerHTML =
+                '<div class="errore">' +
+                '❌ Impossibile avviare la fotocamera.' +
+                '</div>';
+
+        });
+
     </script>
 
 </body>
 </html>
+
+    
