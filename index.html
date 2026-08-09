@@ -15,7 +15,6 @@
         type="text/javascript">
     </script>
 
-
     <style>
 
         body {
@@ -26,17 +25,14 @@
             background: white;
         }
 
-
         h1 {
             font-size: 42px;
             margin-bottom: 40px;
         }
 
-
         h2 {
             margin-bottom: 25px;
         }
-
 
         #reader {
             width: 100%;
@@ -44,12 +40,10 @@
             margin: auto;
         }
 
-
         #risultato {
             margin-top: 30px;
             font-size: 22px;
         }
-
 
         #codice {
             font-size: 26px;
@@ -58,80 +52,59 @@
             word-break: break-all;
         }
 
-
         #prodotto {
-
             margin-top: 30px;
-
             padding: 25px;
-
             border-radius: 15px;
-
             background: #f2f2f2;
-
             max-width: 500px;
-
             margin-left: auto;
-
             margin-right: auto;
         }
 
-
         #prodotto img {
-
             max-width: 220px;
-
             max-height: 220px;
-
             border-radius: 10px;
-
             margin-top: 20px;
         }
 
-
         .nome-prodotto {
-
             font-size: 28px;
-
             font-weight: bold;
-
             margin-top: 10px;
         }
 
-
         .marca {
-
             font-size: 20px;
-
             margin-top: 12px;
         }
 
-
         .caricamento {
-
             font-size: 20px;
-
             margin-top: 10px;
         }
 
-
         .errore {
-
             color: #c62828;
-
             font-weight: bold;
-
             font-size: 20px;
         }
 
-
         .successo {
-
             color: #2e7d32;
-
             font-weight: bold;
-
             font-size: 20px;
+        }
+
+        .debug {
+            margin-top: 20px;
+            padding: 15px;
+            background: #eeeeee;
+            border-radius: 10px;
+            font-size: 14px;
+            text-align: left;
+            word-break: break-word;
         }
 
     </style>
@@ -149,16 +122,14 @@
 
 
     <!--
-        Qui viene visualizzata
-        la fotocamera
+        TELECAMERA / SCANNER
     -->
 
     <div id="reader"></div>
 
 
     <!--
-        Qui mostriamo
-        il codice letto
+        CODICE LETTO
     -->
 
     <div id="risultato">
@@ -171,12 +142,10 @@
 
 
     <!--
-        Qui mostreremo
-        il prodotto trovato
+        RISULTATO PRODOTTO
     -->
 
     <div id="prodotto"></div>
-
 
 
     <script>
@@ -184,13 +153,12 @@
 
         /*
         ==================================================
-        VARIABILE DELLO SCANNER
+        SCANNER
         ==================================================
         */
 
         const scanner =
             new Html5Qrcode("reader");
-
 
 
         /*
@@ -201,9 +169,8 @@
 
         function codiceLetto(decodedText, decodedResult) {
 
-
             console.log(
-                "Codice letto:",
+                "CODICE LETTO:",
                 decodedText
             );
 
@@ -217,10 +184,42 @@
 
 
             /*
-            Fermiamo lo scanner
+            ==================================================
+            DIAGNOSTICA
+            ==================================================
+            */
+
+            document.getElementById("prodotto").innerHTML =
+
+                "<h2>🔎 Codice ricevuto</h2>" +
+
+                "<p><strong>" +
+                decodedText +
+                "</strong></p>" +
+
+                "<p>⏳ Sto preparando la ricerca...</p>";
+
+
+            /*
+            ==================================================
+            POPUP DI TEST
+            ==================================================
+            */
+
+            alert(
+                "Sto cercando il prodotto: " +
+                decodedText
+            );
+
+
+            /*
+            ==================================================
+            FERMIAMO LO SCANNER
+            ==================================================
             */
 
             scanner.clear()
+
                 .then(() => {
 
                     console.log(
@@ -228,6 +227,7 @@
                     );
 
                 })
+
                 .catch((errore) => {
 
                     console.error(
@@ -239,23 +239,19 @@
 
 
             /*
-            Cerchiamo il prodotto
+            ==================================================
+            CERCHIAMO IL PRODOTTO
+            ==================================================
             */
 
-            document.getElementById("prodotto").innerHTML =
-    "<h2>🔎 Codice ricevuto:</h2>" +
-    "<p>" + decodedText + "</p>" +
-    "<p>Ora provo a contattare Open Food Facts...</p>";
-
-cercaProdotto(decodedText);
+            cercaProdotto(decodedText);
 
         }
 
 
-
         /*
         ==================================================
-        CERCA PRODOTTO
+        CERCA PRODOTTO SU OPEN FOOD FACTS
         ==================================================
         */
 
@@ -267,12 +263,21 @@ cercaProdotto(decodedText);
 
 
             /*
-            Mostriamo messaggio
+            Messaggio di caricamento
             */
 
             contenitore.innerHTML =
+
                 '<div class="caricamento">' +
-                '🔎 Cerco il prodotto...' +
+
+                '🔎 Cerco il prodotto su Open Food Facts...' +
+
+                '<br><br>' +
+
+                'Codice: ' +
+
+                codice +
+
                 '</div>';
 
 
@@ -280,23 +285,69 @@ cercaProdotto(decodedText);
 
 
                 /*
-                URL DELLA API OPEN FOOD FACTS
+                ==================================================
+                URL API
+                ==================================================
                 */
 
                 const url =
+
                     "https://world.openfoodfacts.org/api/v2/product/" +
-                    codice +
-                    "?fields=product_name,product_name_it,brands,image_front_url";
+
+                    encodeURIComponent(codice) +
+
+                    "?fields=" +
+
+                    "code," +
+
+                    "product_name," +
+
+                    "product_name_it," +
+
+                    "brands," +
+
+                    "quantity," +
+
+                    "categories," +
+
+                    "ingredients_text," +
+
+                    "image_front_url";
 
 
                 console.log(
-                    "Chiamata API:",
+                    "CHIAMATA API:",
                     url
                 );
 
 
                 /*
-                Facciamo la richiesta
+                Mostriamo la chiamata
+                */
+
+                contenitore.innerHTML =
+
+                    '<div class="caricamento">' +
+
+                    '🌐 Contatto Open Food Facts...' +
+
+                    '<br><br>' +
+
+                    'Codice: ' +
+
+                    codice +
+
+                    '<br><br>' +
+
+                    'Attendere...'
+
+                    + '</div>';
+
+
+                /*
+                ==================================================
+                FETCH
+                ==================================================
                 */
 
                 const risposta =
@@ -304,19 +355,21 @@ cercaProdotto(decodedText);
 
 
                 console.log(
-                    "HTTP:",
+                    "RISPOSTA HTTP:",
                     risposta.status
                 );
 
 
                 /*
-                Controlliamo la risposta
+                ==================================================
+                CONTROLLO HTTP
+                ==================================================
                 */
 
                 if (!risposta.ok) {
 
                     throw new Error(
-                        "HTTP " +
+                        "Errore HTTP: " +
                         risposta.status
                     );
 
@@ -324,8 +377,9 @@ cercaProdotto(decodedText);
 
 
                 /*
-                Convertiamo la risposta
-                in JSON
+                ==================================================
+                CONVERTIAMO IN JSON
+                ==================================================
                 */
 
                 const dati =
@@ -340,10 +394,21 @@ cercaProdotto(decodedText);
 
                 /*
                 ==================================================
-                CONTROLLO PRODOTTO
+                MOSTRIAMO DATI DIAGNOSTICI
                 ==================================================
                 */
 
+                console.log(
+                    "STATUS PRODOTTO:",
+                    dati.status
+                );
+
+
+                /*
+                ==================================================
+                CONTROLLO PRODOTTO
+                ==================================================
+                */
 
                 if (
                     dati.status !== 1 ||
@@ -367,6 +432,32 @@ cercaProdotto(decodedText);
 
                         codice +
 
+                        '</div>' +
+
+                        '<div class="debug">' +
+
+                        '<strong>🔧 Diagnostica</strong>' +
+
+                        '<br><br>' +
+
+                        'Open Food Facts ha risposto correttamente,' +
+
+                        '<br>' +
+
+                        'ma non ha trovato questo codice nel database.' +
+
+                        '<br><br>' +
+
+                        'HTTP: ' +
+
+                        risposta.status +
+
+                        '<br>' +
+
+                        'Status prodotto: ' +
+
+                        dati.status +
+
                         '</div>';
 
 
@@ -375,21 +466,26 @@ cercaProdotto(decodedText);
                 }
 
 
-
                 /*
                 ==================================================
                 PRODOTTO TROVATO
                 ==================================================
                 */
 
-
                 const prodotto =
                     dati.product;
 
 
+                console.log(
+                    "PRODOTTO:",
+                    prodotto
+                );
+
 
                 /*
-                Nome prodotto
+                ==================================================
+                NOME
+                ==================================================
                 */
 
                 const nome =
@@ -401,9 +497,10 @@ cercaProdotto(decodedText);
                     "Nome non disponibile";
 
 
-
                 /*
-                Marca
+                ==================================================
+                MARCA
+                ==================================================
                 */
 
                 const marca =
@@ -413,9 +510,49 @@ cercaProdotto(decodedText);
                     "Marca non disponibile";
 
 
+                /*
+                ==================================================
+                QUANTITÀ
+                ==================================================
+                */
+
+                const quantita =
+
+                    prodotto.quantity ||
+
+                    "Quantità non disponibile";
+
 
                 /*
-                Immagine
+                ==================================================
+                CATEGORIA
+                ==================================================
+                */
+
+                const categoria =
+
+                    prodotto.categories ||
+
+                    "Categoria non disponibile";
+
+
+                /*
+                ==================================================
+                INGREDIENTI
+                ==================================================
+                */
+
+                const ingredienti =
+
+                    prodotto.ingredients_text ||
+
+                    "Ingredienti non disponibili";
+
+
+                /*
+                ==================================================
+                IMMAGINE
+                ==================================================
                 */
 
                 const immagine =
@@ -425,19 +562,34 @@ cercaProdotto(decodedText);
                     "";
 
 
-
                 /*
                 ==================================================
-                CREIAMO LA VISUALIZZAZIONE
+                CREIAMO HTML
                 ==================================================
                 */
-
 
                 let html = "";
 
 
                 /*
-                Nome
+                ==================================================
+                TITOLO
+                ==================================================
+                */
+
+                html +=
+
+                    '<div class="successo">' +
+
+                    '✅ PRODOTTO TROVATO!' +
+
+                    '</div>';
+
+
+                /*
+                ==================================================
+                NOME
+                ==================================================
                 */
 
                 html +=
@@ -452,7 +604,9 @@ cercaProdotto(decodedText);
 
 
                 /*
-                Marca
+                ==================================================
+                MARCA
+                ==================================================
                 */
 
                 html +=
@@ -467,174 +621,37 @@ cercaProdotto(decodedText);
 
 
                 /*
-                Codice
+                ==================================================
+                QUANTITÀ
+                ==================================================
                 */
 
                 html +=
 
-                    '<div style="margin-top:15px;">' +
+                    '<div class="marca">' +
 
-                    '🔢 Codice: ' +
+                    '📦 Quantità: ' +
 
-                    codice +
+                    quantita +
+
+                    '</div>';
+
+
+                /*
+                ==================================================
+                CATEGORIA
+                ==================================================
+                */
+
+                html +=
+
+                    '<div class="marca">' +
+
+                    '🥫 Categoria: ' +
+
+                    categoria +
 
                     '</div>';
 
 
-                /*
-                Immagine
-                */
-
-                if (immagine) {
-
-                    html +=
-
-                        '<img src="' +
-
-                        immagine +
-
-                        '" ' +
-
-                        'alt="Immagine prodotto">';
-
-                }
-
-
-                /*
-                Inseriamo tutto
-                nella pagina
-                */
-
-                contenitore.innerHTML = html;
-
-
-            }
-
-
-            catch (errore) {
-
-
-                console.error(
-                    "ERRORE API:",
-                    errore
-                );
-
-
-                contenitore.innerHTML =
-
-                    '<div class="errore">' +
-
-                    '⚠️ Errore nel collegamento al database' +
-
-                    '<br><br>' +
-
-                    errore.message +
-
-                    '</div>';
-
-            }
-
-        }
-
-
-
-        /*
-        ==================================================
-        CONFIGURAZIONE SCANNER
-        ==================================================
-        */
-
-        const configurazione = {
-
-
-            fps: 10,
-
-
-            qrbox: {
-
-                width: 300,
-
-                height: 150
-
-            },
-
-
-            aspectRatio: 1.777778
-
-        };
-
-
-
-        /*
-        ==================================================
-        AVVIAMO LA FOTOCAMERA
-        ==================================================
-        */
-
-        scanner.start(
-
-            {
-                facingMode: "environment"
-            },
-
-
-            configurazione,
-
-
-            codiceLetto,
-
-
-            function (errore) {
-
-                /*
-                Gli errori normali
-                durante la scansione
-                non vengono mostrati
-                */
-
-            }
-
-        )
-
-
-        .then(() => {
-
-            console.log(
-                "Scanner avviato correttamente"
-            );
-
-        })
-
-
-        .catch((errore) => {
-
-
-            console.error(
-                "Errore avvio fotocamera:",
-                errore
-            );
-
-
-            document.getElementById(
-                "reader"
-            ).innerHTML =
-
-                '<div class="errore">' +
-
-                '❌ Impossibile avviare la fotocamera.' +
-
-                '<br><br>' +
-
-                errore +
-
-                '</div>';
-
-        });
-
-
-    </script>
-
-
-</body>
-
-</html>
+               
