@@ -39,10 +39,6 @@
             text-align: center;
         }
 
-        /* =========================
-           SCANNER
-           ========================= */
-
         .scanner-box {
             background: white;
             max-width: 600px;
@@ -68,10 +64,6 @@
             font-weight: bold;
             word-break: break-all;
         }
-
-        /* =========================
-           RISULTATO PRODOTTO
-           ========================= */
 
         #prodotto {
             margin: 25px auto;
@@ -118,10 +110,6 @@
             margin-top: 20px;
         }
 
-        /* =========================
-           PULSANTI
-           ========================= */
-
         button {
             border: none;
             border-radius: 10px;
@@ -155,10 +143,6 @@
             font-weight: bold;
         }
 
-        /* =========================
-           FRIGO
-           ========================= */
-
         #frigo {
             max-width: 900px;
             margin: 45px auto 0;
@@ -186,10 +170,6 @@
             gap: 18px;
         }
 
-        /* =========================
-           SCHEDA PRODOTTO
-           ========================= */
-
         .prodotto-frigo {
             background: white;
             border-radius: 18px;
@@ -213,13 +193,10 @@
             height: 180px;
             border-radius: 12px;
             background: #f0f2f4;
-
             display: flex;
             align-items: center;
             justify-content: center;
-
             font-size: 65px;
-
             margin-bottom: 15px;
         }
 
@@ -249,10 +226,6 @@
             font-weight: bold;
             text-align: center;
         }
-
-        /* =========================
-           SCADENZA
-           ========================= */
 
         .scadenza {
             margin-top: 15px;
@@ -291,10 +264,6 @@
             border-radius: 8px;
         }
 
-        /* =========================
-           CONTROLLI
-           ========================= */
-
         .controlli {
             display: flex;
             gap: 8px;
@@ -319,25 +288,14 @@
             color: white;
         }
 
-        /* =========================
-           FRIGO VUOTO
-           ========================= */
-
         .frigo-vuoto {
             grid-column: 1 / -1;
-
             text-align: center;
-
             padding: 45px 20px;
-
             background: white;
-
             border-radius: 18px;
-
             color: #666;
-
             font-size: 20px;
-
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
         }
 
@@ -347,10 +305,6 @@
             font-size: 20px;
             font-weight: bold;
         }
-
-        /* =========================
-           MOBILE
-           ========================= */
 
         @media (max-width: 600px) {
 
@@ -510,11 +464,10 @@
         TELEGRAM
         ==================================================
 
-        IMPORTANTE:
-        QUI VA SOLO IL CHAT ID.
+        Il token NON è qui.
+        Il token è protetto nel Worker Cloudflare.
 
-        MAI INSERIRE IL TOKEN DEL BOT.
-
+        ==================================================
         */
 
         const TELEGRAM_WORKER =
@@ -742,9 +695,7 @@
 
                     '<br><br>' +
 
-                    'Scansiona un prodotto per aggiungerlo.'
-
-                    +
+                    'Scansiona un prodotto per aggiungerlo.' +
 
                     '</div>';
 
@@ -834,7 +785,7 @@
 
                         '<div class="nome-frigo">' +
 
-                        prodotto.nome +
+                        produtoNomeSeguro(prodotto.nome) +
 
                         '</div>';
 
@@ -845,7 +796,7 @@
 
                         '🏷️ ' +
 
-                        prodotto.marca +
+                        produtoNomeSeguro(prodotto.marca) +
 
                         '</div>';
 
@@ -856,7 +807,7 @@
 
                         '📦 Confezione: ' +
 
-                        prodotto.quantita +
+                        produtoNomeSeguro(prodotto.quantita) +
 
                         '</div>';
 
@@ -980,6 +931,30 @@
 
             lista.innerHTML =
                 html;
+
+        }
+
+
+        /*
+        ==================================================
+        SICUREZZA TESTO
+        ==================================================
+        */
+
+        function produtoNomeSeguro(testo) {
+
+            if (!testo) {
+
+                return "";
+
+            }
+
+            return String(testo)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
 
         }
 
@@ -1148,7 +1123,7 @@
 
         /*
         ==================================================
-        TELEGRAM
+        INVIA FRIGO A TELEGRAM
         ==================================================
         */
 
@@ -1161,27 +1136,6 @@
                 );
 
 
-            /*
-            Controllo CHAT ID
-            */
-
-            if (
-                TELEGRAM_CHAT_ID ===
-                "642655350"
-            ) {
-
-                risultato.innerText =
-                    "⚠️ Devi inserire il chat ID.";
-
-                return;
-
-            }
-
-
-            /*
-            Controllo frigo
-            */
-
             if (frigo.length === 0) {
 
                 risultato.innerText =
@@ -1191,10 +1145,6 @@
 
             }
 
-
-            /*
-            Creiamo messaggio
-            */
 
             let messaggio =
                 "🧊 FRIGO FAMIGLIA\n\n";
@@ -1560,7 +1510,7 @@
 
         /*
         ==================================================
-        CERCA PRODOTTO
+        CERCA PRODOTTO OPEN FOOD FACTS
         ==================================================
         */
 
@@ -1631,10 +1581,6 @@
                     await risposta.json();
 
 
-                /*
-                PRODOTTO NON TROVATO
-                */
-
                 if (!dati.product) {
 
                     contenitore.innerHTML =
@@ -1647,7 +1593,7 @@
 
                         'Codice: ' +
 
-                        codice +
+                        codigoSeguro(codice) +
 
                         '</div>';
 
@@ -1663,10 +1609,6 @@
                     dati.product;
 
 
-                /*
-                NOME
-                */
-
                 const nome =
 
                     prodotto.product_name_it ||
@@ -1676,20 +1618,12 @@
                     "Nome non disponibile";
 
 
-                /*
-                MARCA
-                */
-
                 const marca =
 
                     prodotto.brands ||
 
                     "Marca non disponibile";
 
-
-                /*
-                QUANTITÀ
-                */
 
                 let quantita =
                     prodotto.quantity || "";
@@ -1723,20 +1657,12 @@
                 }
 
 
-                /*
-                CATEGORIA
-                */
-
                 const categoria =
 
                     prodotto.categories ||
 
                     "Categoria non disponibile";
 
-
-                /*
-                IMMAGINE
-                */
 
                 const immagine =
 
@@ -1746,7 +1672,7 @@
 
 
                 /*
-                AGGIUNTA AUTOMATICA
+                AGGIUNGI AUTOMATICAMENTE AL FRIGO
                 */
 
                 aggiungiAlFrigo({
@@ -1773,7 +1699,7 @@
 
 
                 /*
-                RISULTATO
+                MOSTRA RISULTATO
                 */
 
                 let html = "";
@@ -1794,7 +1720,7 @@
 
                     '🛒 ' +
 
-                    nome +
+                    produtoNomeSeguro(nome) +
 
                     '</div>';
 
@@ -1805,7 +1731,7 @@
 
                     '🏷️ ' +
 
-                    marca +
+                    produtoNomeSeguro(marca) +
 
                     '</div>';
 
@@ -1816,7 +1742,18 @@
 
                     '📦 Confezione: ' +
 
-                    quantita +
+                    produtoNomeSeguro(quantita) +
+
+                    '</div>';
+
+
+                html +=
+
+                    '<div class="dato">' +
+
+                    '🥫 Categoria: ' +
+
+                    produtoNomeSeguro(categoria) +
 
                     '</div>';
 
@@ -1827,7 +1764,7 @@
 
                     '🔢 Codice: ' +
 
-                    codice +
+                    codigoSeguro(codice) +
 
                     '</div>';
 
@@ -1853,7 +1790,7 @@
 
                         'alt="' +
 
-                        nome +
+                        produtoNomeSeguro(nome) +
 
                         '">';
 
@@ -1900,6 +1837,24 @@
 
         /*
         ==================================================
+        SICUREZZA CODICE
+        ==================================================
+        */
+
+        function codigoSeguro(testo) {
+
+            return String(testo)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+
+        }
+
+
+        /*
+        ==================================================
         MOSTRA PULSANTE NUOVA SCANSIONE
         ==================================================
         */
@@ -1934,9 +1889,7 @@
 
                 '<div class="caricamento">' +
 
-                '📷 In attesa di una nuova scansione...'
-
-                +
+                '📷 In attesa di una nuova scansione...' +
 
                 '</div>';
 
@@ -1972,6 +1925,7 @@
 
 
     </script>
+
 
 </body>
 
