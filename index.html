@@ -15,25 +15,41 @@
         type="text/javascript">
     </script>
 
-
     <style>
+
+        * {
+            box-sizing: border-box;
+        }
 
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 25px 15px;
-            background: white;
+            padding: 20px 15px 50px;
+            background: #f5f7f9;
             color: #222;
         }
 
         h1 {
             text-align: center;
-            font-size: 42px;
-            margin-bottom: 30px;
+            font-size: 40px;
+            margin: 10px 0 30px;
         }
 
         h2 {
             text-align: center;
+        }
+
+        /* =========================
+           SCANNER
+           ========================= */
+
+        .scanner-box {
+            background: white;
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
         }
 
         #reader {
@@ -44,22 +60,27 @@
 
         #risultato {
             text-align: center;
-            margin-top: 25px;
+            margin-top: 20px;
         }
 
         #codice {
-            font-size: 26px;
+            font-size: 24px;
             font-weight: bold;
             word-break: break-all;
         }
 
+        /* =========================
+           RISULTATO PRODOTTO
+           ========================= */
+
         #prodotto {
             margin: 25px auto;
             padding: 25px;
-            border-radius: 15px;
-            background: #f2f2f2;
-            max-width: 500px;
+            border-radius: 20px;
+            background: white;
+            max-width: 600px;
             text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
         }
 
         .nome-prodotto {
@@ -69,13 +90,13 @@
         }
 
         .dato {
-            font-size: 19px;
+            font-size: 18px;
             margin-top: 10px;
         }
 
         .caricamento {
             font-size: 20px;
-            text-align: center;
+            padding: 15px;
         }
 
         .successo {
@@ -93,15 +114,19 @@
         #prodotto img {
             max-width: 220px;
             max-height: 220px;
-            border-radius: 10px;
+            border-radius: 12px;
             margin-top: 20px;
         }
+
+        /* =========================
+           PULSANTI
+           ========================= */
 
         button {
             border: none;
             border-radius: 10px;
-            padding: 12px 20px;
-            font-size: 17px;
+            padding: 10px 16px;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
         }
@@ -111,59 +136,177 @@
             margin: 20px auto;
             background: #1976d2;
             color: white;
+            padding: 14px 22px;
         }
 
-        #frigo {
-            max-width: 700px;
-            margin: 40px auto;
+        .telegram-button {
+            display: block;
+            margin: 15px auto;
+            background: #0088cc;
+            color: white;
+            padding: 14px 22px;
         }
 
-        .prodotto-frigo {
-            background: #f2f2f2;
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .prodotto-frigo img {
-            width: 90px;
-            height: 90px;
-            object-fit: contain;
-            border-radius: 10px;
-            background: white;
-        }
-
-        .info-frigo {
-            flex: 1;
-            text-align: left;
-        }
-
-        .nome-frigo {
-            font-size: 21px;
-            font-weight: bold;
-        }
-
-        .marca-frigo {
-            margin-top: 5px;
-            font-size: 16px;
-        }
-
-        .quantita-frigo {
-            margin-top: 8px;
+        #telegramRisultato {
+            text-align: center;
+            max-width: 600px;
+            margin: 15px auto;
             font-size: 18px;
             font-weight: bold;
         }
 
-        .controlli {
+        /* =========================
+           FRIGO
+           ========================= */
+
+        #frigo {
+            max-width: 900px;
+            margin: 45px auto 0;
+        }
+
+        .titolo-frigo {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .contatore-frigo {
+            text-align: center;
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        #listaFrigo {
+            display: grid;
+            grid-template-columns: repeat(
+                auto-fit,
+                minmax(280px, 1fr)
+            );
+            gap: 18px;
+        }
+
+        /* =========================
+           SCHEDA PRODOTTO
+           ========================= */
+
+        .prodotto-frigo {
+            background: white;
+            border-radius: 18px;
+            padding: 18px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.10);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .immagine-frigo {
+            width: 100%;
+            height: 180px;
+            object-fit: contain;
+            border-radius: 12px;
+            background: #fafafa;
+            margin-bottom: 15px;
+        }
+
+        .immagine-mancante {
+            width: 100%;
+            height: 180px;
+            border-radius: 12px;
+            background: #f0f2f4;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 65px;
+
+            margin-bottom: 15px;
+        }
+
+        .nome-frigo {
+            font-size: 22px;
+            font-weight: bold;
+            line-height: 1.2;
+        }
+
+        .marca-frigo {
+            margin-top: 7px;
+            font-size: 16px;
+            color: #666;
+        }
+
+        .confezione-frigo {
+            margin-top: 12px;
+            font-size: 17px;
+        }
+
+        .quantita-frigo {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 10px;
+            background: #eef6ff;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* =========================
+           SCADENZA
+           ========================= */
+
+        .scadenza {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: bold;
+        }
+
+        .scadenza-nessuna {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .scadenza-verde {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .scadenza-arancio {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+
+        .scadenza-rossa {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .campo-data {
             margin-top: 10px;
+            width: 100%;
+            padding: 10px;
+            font-size: 17px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        /* =========================
+           CONTROLLI
+           ========================= */
+
+        .controlli {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .controlli button {
+            flex: 1;
         }
 
         .meno {
             background: #e0e0e0;
-            margin-right: 5px;
         }
 
         .piu {
@@ -174,14 +317,28 @@
         .elimina {
             background: #c62828;
             color: white;
-            margin-left: 5px;
         }
 
+        /* =========================
+           FRIGO VUOTO
+           ========================= */
+
         .frigo-vuoto {
+            grid-column: 1 / -1;
+
             text-align: center;
-            padding: 30px;
+
+            padding: 45px 20px;
+
+            background: white;
+
+            border-radius: 18px;
+
             color: #666;
+
             font-size: 20px;
+
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
         }
 
         .aggiunto {
@@ -189,6 +346,26 @@
             color: #2e7d32;
             font-size: 20px;
             font-weight: bold;
+        }
+
+        /* =========================
+           MOBILE
+           ========================= */
+
+        @media (max-width: 600px) {
+
+            h1 {
+                font-size: 34px;
+            }
+
+            .titolo-frigo {
+                font-size: 28px;
+            }
+
+            #listaFrigo {
+                grid-template-columns: 1fr;
+            }
+
         }
 
     </style>
@@ -202,15 +379,22 @@
     <h1>🥶 Frigo Famiglia</h1>
 
 
-    <h2>📷 Inquadra il codice a barre</h2>
+    <!-- =========================
+         SCANNER
+         ========================= -->
+
+    <div class="scanner-box">
+
+        <h2>📷 Inquadra il codice a barre</h2>
+
+        <div id="reader"></div>
+
+    </div>
 
 
-    <!-- SCANNER -->
-
-    <div id="reader"></div>
-
-
-    <!-- CODICE LETTO -->
+    <!-- =========================
+         CODICE LETTO
+         ========================= -->
 
     <div id="risultato">
 
@@ -221,7 +405,9 @@
     </div>
 
 
-    <!-- RISULTATO PRODOTTO -->
+    <!-- =========================
+         RISULTATO
+         ========================= -->
 
     <div id="prodotto">
 
@@ -234,7 +420,9 @@
     </div>
 
 
-    <!-- NUOVA SCANSIONE -->
+    <!-- =========================
+         NUOVA SCANSIONE
+         ========================= -->
 
     <button
         id="nuovaScansione"
@@ -247,13 +435,39 @@
     </button>
 
 
-    <!-- ==================================================
+    <!-- =========================
+         TELEGRAM
+         ========================= -->
+
+    <button
+        id="telegramButton"
+        class="telegram-button"
+        onclick="inviaFrigoTelegram()">
+
+        📤 Invia il mio frigo a Telegram
+
+    </button>
+
+
+    <div id="telegramRisultato"></div>
+
+
+    <!-- =========================
          FRIGORIFERO
-         ================================================== -->
+         ========================= -->
 
     <div id="frigo">
 
-        <h2>🧊 Il mio frigorifero</h2>
+        <div class="titolo-frigo">
+
+            🧊 Il mio frigorifero
+
+        </div>
+
+        <div
+            id="contatoreFrigo"
+            class="contatore-frigo">
+        </div>
 
         <div id="listaFrigo"></div>
 
@@ -265,7 +479,7 @@
 
         /*
         ==================================================
-        VARIABILI SCANNER
+        SCANNER
         ==================================================
         */
 
@@ -278,16 +492,220 @@
 
         /*
         ==================================================
-        DATABASE LOCALE DEL FRIGO
+        FRIGO
         ==================================================
-
-        I prodotti vengono salvati nel browser.
-
         */
 
         let frigo = JSON.parse(
-            localStorage.getItem("frigoFamiglia")
+
+            localStorage.getItem(
+                "frigoFamiglia"
+            )
+
         ) || [];
+
+
+        /*
+        ==================================================
+        TELEGRAM
+        ==================================================
+
+        IMPORTANTE:
+        QUI VA SOLO IL CHAT ID.
+
+        MAI INSERIRE IL TOKEN DEL BOT.
+
+        */
+
+        const TELEGRAM_WORKER =
+            "https://frigo-telegram.ilclait.workers.dev";
+
+
+        const TELEGRAM_CHAT_ID =
+            "INSERISCI_QUI_IL_CHAT_ID";
+
+
+        /*
+        ==================================================
+        SALVA FRIGO
+        ==================================================
+        */
+
+        function salvaFrigo() {
+
+            localStorage.setItem(
+
+                "frigoFamiglia",
+
+                JSON.stringify(frigo)
+
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        STATO SCADENZA
+        ==================================================
+        */
+
+        function statoScadenza(data) {
+
+
+            if (!data) {
+
+                return {
+
+                    classe:
+                        "scadenza-nessuna",
+
+                    testo:
+                        "📅 Scadenza: non inserita"
+
+                };
+
+            }
+
+
+            const oggi =
+                new Date();
+
+
+            oggi.setHours(
+                0,
+                0,
+                0,
+                0
+            );
+
+
+            const scadenza =
+                new Date(
+                    data + "T00:00:00"
+                );
+
+
+            const differenza =
+                Math.ceil(
+
+                    (
+                        scadenza -
+                        oggi
+                    )
+                    /
+                    (
+                        1000 *
+                        60 *
+                        60 *
+                        24
+                    )
+
+                );
+
+
+            if (differenza < 0) {
+
+                return {
+
+                    classe:
+                        "scadenza-rossa",
+
+                    testo:
+                        "🔴 Scaduto: " +
+                        formattaData(data)
+
+                };
+
+            }
+
+
+            if (differenza === 0) {
+
+                return {
+
+                    classe:
+                        "scadenza-rossa",
+
+                    testo:
+                        "🔴 Scade oggi"
+
+                };
+
+            }
+
+
+            if (differenza <= 3) {
+
+                return {
+
+                    classe:
+                        "scadenza-arancio",
+
+                    testo:
+                        "🟠 Scade tra " +
+                        differenza +
+                        " giorni: " +
+                        formattaData(data)
+
+                };
+
+            }
+
+
+            return {
+
+                classe:
+                    "scadenza-verde",
+
+                testo:
+                    "🟢 Scadenza: " +
+                    formattaData(data)
+
+            };
+
+        }
+
+
+        /*
+        ==================================================
+        FORMATTA DATA
+        ==================================================
+        */
+
+        function formattaData(data) {
+
+            if (!data) {
+
+                return "";
+
+            }
+
+
+            const parti =
+                data.split("-");
+
+
+            if (
+                parti.length !== 3
+            ) {
+
+                return data;
+
+            }
+
+
+            return (
+
+                parti[2] +
+                "/" +
+                parti[1] +
+                "/" +
+                parti[0]
+
+            );
+
+        }
 
 
         /*
@@ -305,11 +723,16 @@
                 );
 
 
-            /*
-            Frigo vuoto
-            */
+            const contatore =
+                document.getElementById(
+                    "contatoreFrigo"
+                );
+
 
             if (frigo.length === 0) {
+
+                contatore.innerText =
+                    "Nessun prodotto";
 
                 lista.innerHTML =
 
@@ -330,15 +753,41 @@
             }
 
 
-            /*
-            Costruiamo lista
-            */
+            let totale = 0;
+
+
+            frigo.forEach(
+                function(prodotto) {
+
+                    totale +=
+                        prodotto.quantitaFrigo;
+
+                }
+            );
+
+
+            contatore.innerText =
+
+                frigo.length +
+
+                " prodotti diversi • " +
+
+                totale +
+
+                " confezioni totali";
+
 
             let html = "";
 
 
             frigo.forEach(
-                function (prodotto, indice) {
+                function(prodotto, indice) {
+
+
+                    const stato =
+                        statoScadenza(
+                            prodotto.scadenza
+                        );
 
 
                     html +=
@@ -346,21 +795,25 @@
                         '<div class="prodotto-frigo">';
 
 
-                    /*
-                    Immagine
-                    */
-
                     if (prodotto.immagine) {
 
                         html +=
 
-                            '<img src="' +
+                            '<img ' +
+
+                            'class="immagine-frigo" ' +
+
+                            'src="' +
 
                             prodotto.immagine +
 
                             '" ' +
 
-                            'alt="">' ;
+                            'alt="' +
+
+                            prodotto.nome +
+
+                            '">';
 
                     }
 
@@ -368,40 +821,13 @@
 
                         html +=
 
-                            '<div style="' +
-
-                            'width:90px;' +
-
-                            'height:90px;' +
-
-                            'display:flex;' +
-
-                            'align-items:center;' +
-
-                            'justify-content:center;' +
-
-                            'font-size:45px;' +
-
-                            'background:white;' +
-
-                            'border-radius:10px;' +
-
-                            '">' +
+                            '<div class="immagine-mancante">' +
 
                             '🛒' +
 
                             '</div>';
 
                     }
-
-
-                    /*
-                    Informazioni
-                    */
-
-                    html +=
-
-                        '<div class="info-frigo">';
 
 
                     html +=
@@ -426,7 +852,7 @@
 
                     html +=
 
-                        '<div class="marca-frigo">' +
+                        '<div class="confezione-frigo">' +
 
                         '📦 Confezione: ' +
 
@@ -439,16 +865,49 @@
 
                         '<div class="quantita-frigo">' +
 
-                        '🧊 Nel frigo: ' +
+                        '🧊 Quantità nel frigo: ' +
 
                         prodotto.quantitaFrigo +
 
                         '</div>';
 
 
-                    /*
-                    Controlli
-                    */
+                    html +=
+
+                        '<div class="scadenza ' +
+
+                        stato.classe +
+
+                        '">' +
+
+                        stato.testo +
+
+                        '</div>';
+
+
+                    html +=
+
+                        '<input ' +
+
+                        'type="date" ' +
+
+                        'class="campo-data" ' +
+
+                        'value="' +
+
+                        (
+                            prodotto.scadenza ||
+                            ""
+                        ) +
+
+                        '" ' +
+
+                        'onchange="cambiaScadenza(' +
+
+                        indice +
+
+                        ', this.value)">';
+
 
                     html +=
 
@@ -515,59 +974,53 @@
 
                         '</div>';
 
-
-                    html +=
-
-                        '</div>';
-
                 }
             );
 
 
-            lista.innerHTML = html;
+            lista.innerHTML =
+                html;
 
         }
 
 
         /*
         ==================================================
-        SALVA FRIGO
+        CAMBIA SCADENZA
         ==================================================
         */
 
-        function salvaFrigo() {
+        function cambiaScadenza(
+            indice,
+            nuovaData
+        ) {
 
 
-            localStorage.setItem(
+            frigo[indice].scadenza =
+                nuovaData;
 
-                "frigoFamiglia",
 
-                JSON.stringify(frigo)
+            salvaFrigo();
 
-            );
+            mostraFrigo();
 
         }
 
 
         /*
         ==================================================
-        AGGIUNGI PRODOTTO AL FRIGO
+        AGGIUNGI AL FRIGO
         ==================================================
         */
 
-        function aggiungiAlFrigo(prodotto) {
+        function aggiungiAlFrigo(
+            prodotto
+        ) {
 
-
-            /*
-            Cerchiamo se il prodotto
-            è già presente.
-
-            Usiamo il codice EAN.
-            */
 
             const esistente =
                 frigo.find(
-                    function (elemento) {
+                    function(elemento) {
 
                         return elemento.codice ===
                             prodotto.codice;
@@ -576,24 +1029,11 @@
                 );
 
 
-            /*
-            ==================================================
-            PRODOTTO GIÀ PRESENTE
-            ==================================================
-            */
-
             if (esistente) {
 
                 esistente.quantitaFrigo++;
 
             }
-
-
-            /*
-            ==================================================
-            NUOVO PRODOTTO
-            ==================================================
-            */
 
             else {
 
@@ -618,23 +1058,17 @@
                         prodotto.immagine,
 
                     quantitaFrigo:
-                        1
+                        1,
+
+                    scadenza:
+                        ""
 
                 });
 
             }
 
 
-            /*
-            Salviamo
-            */
-
             salvaFrigo();
-
-
-            /*
-            Aggiorniamo visualizzazione
-            */
 
             mostraFrigo();
 
@@ -643,15 +1077,13 @@
 
         /*
         ==================================================
-        AUMENTA QUANTITÀ
+        AUMENTA
         ==================================================
         */
 
         function aumenta(indice) {
 
-
             frigo[indice].quantitaFrigo++;
-
 
             salvaFrigo();
 
@@ -662,7 +1094,7 @@
 
         /*
         ==================================================
-        DIMINUISCI QUANTITÀ
+        DIMINUISCI
         ==================================================
         */
 
@@ -678,11 +1110,6 @@
             }
 
             else {
-
-                /*
-                Se arriva a zero,
-                eliminiamo il prodotto.
-                */
 
                 frigo.splice(
                     indice,
@@ -701,22 +1128,223 @@
 
         /*
         ==================================================
-        ELIMINA PRODOTTO
+        ELIMINA
         ==================================================
         */
 
         function elimina(indice) {
-
 
             frigo.splice(
                 indice,
                 1
             );
 
-
             salvaFrigo();
 
             mostraFrigo();
+
+        }
+
+
+        /*
+        ==================================================
+        TELEGRAM
+        ==================================================
+        */
+
+        async function inviaFrigoTelegram() {
+
+
+            const risultato =
+                document.getElementById(
+                    "telegramRisultato"
+                );
+
+
+            /*
+            Controllo CHAT ID
+            */
+
+            if (
+                TELEGRAM_CHAT_ID ===
+                "642655350"
+            ) {
+
+                risultato.innerText =
+                    "⚠️ Devi inserire il chat ID.";
+
+                return;
+
+            }
+
+
+            /*
+            Controllo frigo
+            */
+
+            if (frigo.length === 0) {
+
+                risultato.innerText =
+                    "🧊 Il frigo è vuoto.";
+
+                return;
+
+            }
+
+
+            /*
+            Creiamo messaggio
+            */
+
+            let messaggio =
+                "🧊 FRIGO FAMIGLIA\n\n";
+
+
+            messaggio +=
+                "📦 Prodotti presenti:\n\n";
+
+
+            frigo.forEach(
+                function(prodotto, indice) {
+
+
+                    messaggio +=
+
+                        (indice + 1) +
+                        ". " +
+                        prodotto.nome +
+                        "\n";
+
+
+                    messaggio +=
+
+                        "🏷️ " +
+                        prodotto.marca +
+                        "\n";
+
+
+                    messaggio +=
+
+                        "📦 " +
+                        prodotto.quantita +
+                        "\n";
+
+
+                    messaggio +=
+
+                        "🧊 Quantità: " +
+                        prodotto.quantitaFrigo +
+                        "\n";
+
+
+                    if (
+                        prodotto.scadenza
+                    ) {
+
+                        messaggio +=
+
+                            "📅 Scadenza: " +
+
+                            formattaData(
+                                prodotto.scadenza
+                            ) +
+
+                            "\n";
+
+                    }
+
+
+                    messaggio +=
+                        "\n";
+
+                }
+            );
+
+
+            risultato.innerText =
+                "📤 Invio del frigo a Telegram...";
+
+
+            try {
+
+
+                const risposta =
+                    await fetch(
+
+                        TELEGRAM_WORKER,
+
+                        {
+
+                            method:
+                                "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    chat_id:
+                                        TELEGRAM_CHAT_ID,
+
+                                    messaggio:
+                                        messaggio
+
+                                })
+
+                        }
+
+                    );
+
+
+                const dati =
+                    await risposta.json();
+
+
+                if (
+                    !risposta.ok ||
+                    !dati.ok
+                ) {
+
+                    throw new Error(
+
+                        dati.description ||
+
+                        dati.errore ||
+
+                        "Errore Telegram"
+
+                    );
+
+                }
+
+
+                risultato.innerText =
+                    "✅ Frigo inviato a Telegram!";
+
+
+            }
+
+            catch (errore) {
+
+
+                console.error(
+                    "Errore Telegram:",
+                    errore
+                );
+
+
+                risultato.innerText =
+
+                    "❌ Errore invio Telegram: " +
+
+                    errore.message;
+
+            }
 
         }
 
@@ -735,13 +1363,18 @@
             );
 
 
-            codiceGiaLetto = false;
+            codiceGiaLetto =
+                false;
 
-            scansioneInCorso = true;
+
+            scansioneInCorso =
+                true;
 
 
             scanner =
-                new Html5Qrcode("reader");
+                new Html5Qrcode(
+                    "reader"
+                );
 
 
             const configurazione = {
@@ -749,11 +1382,15 @@
                 fps: 10,
 
                 qrbox: {
+
                     width: 300,
+
                     height: 150
+
                 },
 
-                aspectRatio: 1.777778
+                aspectRatio:
+                    1.777778
 
             };
 
@@ -761,24 +1398,25 @@
             scanner.start(
 
                 {
-                    facingMode: "environment"
+                    facingMode:
+                        "environment"
                 },
 
                 configurazione,
 
                 codiceLetto,
 
-                function () {
+                function() {
 
                     /*
-                    Errori normali ignorati.
+                    Errori normali ignorati
                     */
 
                 }
 
             )
 
-            .then(function () {
+            .then(function() {
 
                 console.log(
                     "Fotocamera avviata"
@@ -786,7 +1424,7 @@
 
             })
 
-            .catch(function (errore) {
+            .catch(function(errore) {
 
                 console.error(
                     "Errore fotocamera:",
@@ -794,7 +1432,8 @@
                 );
 
 
-                scansioneInCorso = false;
+                scansioneInCorso =
+                    false;
 
 
                 document.getElementById(
@@ -828,10 +1467,6 @@
         ) {
 
 
-            /*
-            Evitiamo doppia lettura
-            */
-
             if (codiceGiaLetto) {
 
                 return;
@@ -839,7 +1474,8 @@
             }
 
 
-            codiceGiaLetto = true;
+            codiceGiaLetto =
+                true;
 
 
             console.log(
@@ -848,18 +1484,11 @@
             );
 
 
-            /*
-            Mostriamo codice
-            */
-
             document.getElementById(
                 "codice"
-            ).innerText = decodedText;
+            ).innerText =
+                decodedText;
 
-
-            /*
-            Messaggio
-            */
 
             document.getElementById(
                 "prodotto"
@@ -880,18 +1509,12 @@
                 '</div>';
 
 
-            /*
-            Fermiamo scanner
-            */
-
             fermaScanner();
 
 
-            /*
-            Cerchiamo prodotto
-            */
-
-            cercaProdotto(decodedText);
+            cercaProdotto(
+                decodedText
+            );
 
         }
 
@@ -916,23 +1539,19 @@
 
                     await scanner.clear();
 
-                    console.log(
-                        "Scanner fermato"
-                    );
-
                 }
 
-                catch (errore) {
+                catch(errore) {
 
                     console.error(
-                        "Errore scanner:",
                         errore
                     );
 
                 }
 
 
-                scansioneInCorso = false;
+                scansioneInCorso =
+                    false;
 
             }
 
@@ -945,7 +1564,9 @@
         ==================================================
         */
 
-        async function cercaProdotto(codice) {
+        async function cercaProdotto(
+            codice
+        ) {
 
 
             const contenitore =
@@ -954,15 +1575,13 @@
                 );
 
 
-            /*
-            API OPEN FOOD FACTS V3
-            */
-
             const url =
 
                 "https://world.openfoodfacts.org/api/v3/product/" +
 
-                encodeURIComponent(codice) +
+                encodeURIComponent(
+                    codice
+                ) +
 
                 "?product_type=food" +
 
@@ -991,27 +1610,11 @@
                 "image_front_url";
 
 
-            console.log(
-                "URL API:",
-                url
-            );
-
-
             try {
 
 
-                /*
-                Chiamata API
-                */
-
                 const risposta =
                     await fetch(url);
-
-
-                console.log(
-                    "HTTP:",
-                    risposta.status
-                );
 
 
                 if (!risposta.ok) {
@@ -1024,28 +1627,15 @@
                 }
 
 
-                /*
-                JSON
-                */
-
                 const dati =
                     await risposta.json();
 
 
-                console.log(
-                    "Dati ricevuti:",
-                    dati
-                );
-
-
                 /*
-                ==================================================
                 PRODOTTO NON TROVATO
-                ==================================================
                 */
 
                 if (!dati.product) {
-
 
                     contenitore.innerHTML =
 
@@ -1064,24 +1654,17 @@
 
                     mostraPulsante();
 
-
                     return;
 
                 }
 
-
-                /*
-                ==================================================
-                DATI PRODOTTO
-                ==================================================
-                */
 
                 const prodotto =
                     dati.product;
 
 
                 /*
-                Nome
+                NOME
                 */
 
                 const nome =
@@ -1094,7 +1677,7 @@
 
 
                 /*
-                Marca
+                MARCA
                 */
 
                 const marca =
@@ -1105,7 +1688,7 @@
 
 
                 /*
-                Quantità confezione
+                QUANTITÀ
                 */
 
                 let quantita =
@@ -1141,7 +1724,7 @@
 
 
                 /*
-                Categoria
+                CATEGORIA
                 */
 
                 const categoria =
@@ -1152,7 +1735,7 @@
 
 
                 /*
-                Immagine
+                IMMAGINE
                 */
 
                 const immagine =
@@ -1163,9 +1746,7 @@
 
 
                 /*
-                ==================================================
-                AGGIUNGI AUTOMATICAMENTE AL FRIGO
-                ==================================================
+                AGGIUNTA AUTOMATICA
                 */
 
                 aggiungiAlFrigo({
@@ -1192,9 +1773,7 @@
 
 
                 /*
-                ==================================================
-                MOSTRA RISULTATO
-                ==================================================
+                RISULTATO
                 */
 
                 let html = "";
@@ -1262,10 +1841,6 @@
                     '</div>';
 
 
-                /*
-                Immagine
-                */
-
                 if (immagine) {
 
                     html +=
@@ -1276,7 +1851,11 @@
 
                         '" ' +
 
-                        'alt="Immagine prodotto">';
+                        'alt="' +
+
+                        nome +
+
+                        '">';
 
                 }
 
@@ -1285,16 +1864,12 @@
                     html;
 
 
-                /*
-                Pulsante
-                */
-
                 mostraPulsante();
 
             }
 
 
-            catch (errore) {
+            catch(errore) {
 
 
                 console.error(
@@ -1325,7 +1900,7 @@
 
         /*
         ==================================================
-        MOSTRA PULSANTE
+        MOSTRA PULSANTE NUOVA SCANSIONE
         ==================================================
         */
 
@@ -1387,24 +1962,16 @@
 
         /*
         ==================================================
-        MOSTRIAMO IL FRIGO ALL'AVVIO
+        AVVIO
         ==================================================
         */
 
         mostraFrigo();
 
-
-        /*
-        ==================================================
-        AVVIAMO LO SCANNER
-        ==================================================
-        */
-
         avviaScanner();
 
 
     </script>
-
 
 </body>
 
