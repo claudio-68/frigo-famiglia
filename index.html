@@ -39,6 +39,10 @@
             text-align: center;
         }
 
+        /* =========================
+           SCANNER
+           ========================= */
+
         .scanner-box {
             background: white;
             max-width: 600px;
@@ -64,6 +68,10 @@
             font-weight: bold;
             word-break: break-all;
         }
+
+        /* =========================
+           PRODOTTO
+           ========================= */
 
         #prodotto {
             margin: 25px auto;
@@ -110,6 +118,10 @@
             margin-top: 20px;
         }
 
+        /* =========================
+           PULSANTI
+           ========================= */
+
         button {
             border: none;
             border-radius: 10px;
@@ -117,6 +129,11 @@
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .nuova-scansione {
@@ -135,6 +152,14 @@
             padding: 14px 22px;
         }
 
+        .importa-button {
+            display: block;
+            margin: 15px auto;
+            background: #7b1fa2;
+            color: white;
+            padding: 14px 22px;
+        }
+
         #telegramRisultato {
             text-align: center;
             max-width: 600px;
@@ -142,6 +167,18 @@
             font-size: 18px;
             font-weight: bold;
         }
+
+        #databaseRisultato {
+            text-align: center;
+            max-width: 600px;
+            margin: 10px auto;
+            font-size: 17px;
+            font-weight: bold;
+        }
+
+        /* =========================
+           FRIGO
+           ========================= */
 
         #frigo {
             max-width: 900px;
@@ -170,6 +207,10 @@
             gap: 18px;
         }
 
+        /* =========================
+           SCHEDA PRODOTTO
+           ========================= */
+
         .prodotto-frigo {
             background: white;
             border-radius: 18px;
@@ -193,10 +234,13 @@
             height: 180px;
             border-radius: 12px;
             background: #f0f2f4;
+
             display: flex;
             align-items: center;
             justify-content: center;
+
             font-size: 65px;
+
             margin-bottom: 15px;
         }
 
@@ -217,6 +261,12 @@
             font-size: 17px;
         }
 
+        .categoria-frigo {
+            margin-top: 7px;
+            font-size: 15px;
+            color: #777;
+        }
+
         .quantita-frigo {
             margin-top: 15px;
             padding: 10px;
@@ -226,6 +276,10 @@
             font-weight: bold;
             text-align: center;
         }
+
+        /* =========================
+           SCADENZA
+           ========================= */
 
         .scadenza {
             margin-top: 15px;
@@ -264,6 +318,10 @@
             border-radius: 8px;
         }
 
+        /* =========================
+           CONTROLLI
+           ========================= */
+
         .controlli {
             display: flex;
             gap: 8px;
@@ -288,14 +346,25 @@
             color: white;
         }
 
+        /* =========================
+           FRIGO VUOTO
+           ========================= */
+
         .frigo-vuoto {
             grid-column: 1 / -1;
+
             text-align: center;
+
             padding: 45px 20px;
+
             background: white;
+
             border-radius: 18px;
+
             color: #666;
+
             font-size: 20px;
+
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
         }
 
@@ -305,6 +374,22 @@
             font-size: 20px;
             font-weight: bold;
         }
+
+        /* =========================
+           STATO DATABASE
+           ========================= */
+
+        .database-online {
+            color: #2e7d32;
+        }
+
+        .database-offline {
+            color: #c62828;
+        }
+
+        /* =========================
+           MOBILE
+           ========================= */
 
         @media (max-width: 600px) {
 
@@ -360,7 +445,7 @@
 
 
     <!-- =========================
-         RISULTATO
+         RISULTATO PRODOTTO
          ========================= -->
 
     <div id="prodotto">
@@ -390,6 +475,21 @@
 
 
     <!-- =========================
+         IMPORTAZIONE VECCHIO FRIGO
+         ========================= -->
+
+    <button
+        id="importaButton"
+        class="importa-button"
+        onclick="importaFrigoLocale()"
+        style="display:none;">
+
+        📥 Importa il vecchio frigo
+
+    </button>
+
+
+    <!-- =========================
          TELEGRAM
          ========================= -->
 
@@ -404,6 +504,19 @@
 
 
     <div id="telegramRisultato"></div>
+
+
+    <!-- =========================
+         STATO DATABASE
+         ========================= -->
+
+    <div
+        id="databaseRisultato"
+        class="database-online">
+
+        ☁️ Collegamento al frigo condiviso...
+
+    </div>
 
 
     <!-- =========================
@@ -433,6 +546,38 @@
 
         /*
         ==================================================
+        CONFIGURAZIONE SUPABASE
+        ==================================================
+        */
+
+        const SUPABASE_URL =
+            "https://gfoukzgadjidvamoeslm.supabase.co";
+
+
+        const SUPABASE_KEY =
+            "sb_publishable_s97FpTxFjeap3_pEHIytIg_DY0FtVvq";
+
+
+        const SUPABASE_TABELLA =
+            "prodotti_frigo";
+
+
+        /*
+        ==================================================
+        TELEGRAM
+        ==================================================
+        */
+
+        const TELEGRAM_WORKER =
+            "https://frigo-telegram.ilclait.workers.dev";
+
+
+        const TELEGRAM_CHAT_ID =
+            "-1004296706652";
+
+
+        /*
+        ==================================================
         SCANNER
         ==================================================
         */
@@ -448,51 +593,343 @@
         ==================================================
         FRIGO
         ==================================================
+
+        Ora il frigo viene caricato da Supabase.
+
+        ==================================================
         */
 
-        let frigo = JSON.parse(
-
-            localStorage.getItem(
-                "frigoFamiglia"
-            )
-
-        ) || [];
+        let frigo = [];
 
 
         /*
         ==================================================
-        TELEGRAM
-        ==================================================
-
-        Il token NON è qui.
-        Il token è protetto nel Worker Cloudflare.
-
+        FUNZIONE API SUPABASE
         ==================================================
         */
 
-        const TELEGRAM_WORKER =
-            "https://frigo-telegram.ilclait.workers.dev";
+        async function supabaseFetch(
+            endpoint,
+            options = {}
+        ) {
 
 
-        const TELEGRAM_CHAT_ID =
-            "-1004296706652";
+            const headers = {
+
+                "apikey":
+                    SUPABASE_KEY,
+
+                "Authorization":
+                    "Bearer " +
+                    SUPABASE_KEY,
+
+                "Content-Type":
+                    "application/json",
+
+                ...(options.headers || {})
+
+            };
+
+
+            const risposta =
+                await fetch(
+
+                    SUPABASE_URL +
+                    "/rest/v1/" +
+                    endpoint,
+
+                    {
+
+                        ...options,
+
+                        headers:
+                            headers
+
+                    }
+
+                );
+
+
+            if (!risposta.ok) {
+
+                const testo =
+                    await risposta.text();
+
+                throw new Error(
+
+                    "Supabase HTTP " +
+                    risposta.status +
+                    ": " +
+                    testo
+
+                );
+
+            }
+
+
+            if (
+                risposta.status ===
+                204
+            ) {
+
+                return null;
+
+            }
+
+
+            return await risposta.json();
+
+        }
+
+
+        /*
+        ==================================================
+        STATO DATABASE
+        ==================================================
+        */
+
+        function statoDatabase(
+            testo,
+            online = true
+        ) {
+
+
+            const elemento =
+                document.getElementById(
+                    "databaseRisultato"
+                );
+
+
+            elemento.innerText =
+                testo;
+
+
+            elemento.className =
+                online
+                    ? "database-online"
+                    : "database-offline";
+
+        }
+
+
+        /*
+        ==================================================
+        CARICA FRIGO DA SUPABASE
+        ==================================================
+        */
+
+        async function caricaFrigo() {
+
+
+            try {
+
+
+                statoDatabase(
+                    "☁️ Carico il frigo condiviso...",
+                    true
+                );
+
+
+                const dati =
+                    await supabaseFetch(
+
+                        SUPABASE_TABELLA +
+
+                        "?select=*&order=nome.asc"
+
+                    );
+
+
+                frigo =
+                    dati.map(
+
+                        function(prodotto) {
+
+                            return {
+
+                                id:
+                                    prodotto.id,
+
+                                codice:
+                                    prodotto.codice,
+
+                                nome:
+                                    prodotto.nome,
+
+                                marca:
+                                    prodotto.marca || "",
+
+                                quantita:
+                                    prodotto.quantita || "",
+
+                                categoria:
+                                    prodotto.categoria || "",
+
+                                immagine:
+                                    prodotto.immagine || "",
+
+                                quantitaFrigo:
+                                    Number(
+                                        prodotto.quantita_frigo
+                                    ),
+
+                                scadenza:
+                                    prodotto.scadenza || ""
+
+                            };
+
+                        }
+
+                    );
+
+
+                mostraFrigo();
+
+
+                statoDatabase(
+                    "☁️ Frigo condiviso sincronizzato",
+                    true
+                );
+
+
+                controllaImportazioneLocale();
+
+            }
+
+
+            catch (errore) {
+
+
+                console.error(
+                    "Errore caricamento Supabase:",
+                    errore
+                );
+
+
+                statoDatabase(
+
+                    "❌ Errore collegamento al database",
+
+                    false
+
+                );
+
+            }
+
+        }
+
+
+        /*
+        ==================================================
+        SINCRONIZZAZIONE PERIODICA
+        ==================================================
+        */
+
+        async function sincronizzaFrigo() {
+
+
+            try {
+
+
+                const dati =
+                    await supabaseFetch(
+
+                        SUPABASE_TABELLA +
+
+                        "?select=*&order=nome.asc"
+
+                    );
+
+
+                frigo =
+                    dati.map(
+
+                        function(prodotto) {
+
+                            return {
+
+                                id:
+                                    prodotto.id,
+
+                                codice:
+                                    prodotto.codice,
+
+                                nome:
+                                    prodotto.nome,
+
+                                marca:
+                                    prodotto.marca || "",
+
+                                quantita:
+                                    prodotto.quantita || "",
+
+                                categoria:
+                                    prodotto.categoria || "",
+
+                                immagine:
+                                    prodotto.immagine || "",
+
+                                quantitaFrigo:
+                                    Number(
+                                        prodotto.quantita_frigo
+                                    ),
+
+                                scadenza:
+                                    prodotto.scadenza || ""
+
+                            };
+
+                        }
+
+                    );
+
+
+                mostraFrigo();
+
+
+                statoDatabase(
+                    "☁️ Frigo sincronizzato",
+                    true
+                );
+
+
+            }
+
+
+            catch (errore) {
+
+                console.error(
+                    "Errore sincronizzazione:",
+                    errore
+                );
+
+                statoDatabase(
+                    "⚠️ Sincronizzazione non disponibile",
+                    false
+                );
+
+            }
+
+        }
 
 
         /*
         ==================================================
         SALVA FRIGO
+
+        Non usiamo più localStorage come database.
+
         ==================================================
         */
 
         function salvaFrigo() {
 
-            localStorage.setItem(
+            /*
+            La funzione rimane per compatibilità
+            con il vecchio codice.
 
-                "frigoFamiglia",
-
-                JSON.stringify(frigo)
-
-            );
+            Il database vero è Supabase.
+            */
 
         }
 
@@ -628,6 +1065,7 @@
 
         function formattaData(data) {
 
+
             if (!data) {
 
                 return "";
@@ -663,6 +1101,53 @@
 
         /*
         ==================================================
+        SICUREZZA HTML
+        ==================================================
+        */
+
+        function escapeHtml(testo) {
+
+
+            if (testo === null ||
+                testo === undefined) {
+
+                return "";
+
+            }
+
+
+            return String(testo)
+
+                .replace(
+                    /&/g,
+                    "&amp;"
+                )
+
+                .replace(
+                    /</g,
+                    "&lt;"
+                )
+
+                .replace(
+                    />/g,
+                    "&gt;"
+                )
+
+                .replace(
+                    /"/g,
+                    "&quot;"
+                )
+
+                .replace(
+                    /'/g,
+                    "&#039;"
+                );
+
+        }
+
+
+        /*
+        ==================================================
         MOSTRA FRIGO
         ==================================================
         */
@@ -686,6 +1171,7 @@
 
                 contatore.innerText =
                     "Nessun prodotto";
+
 
                 lista.innerHTML =
 
@@ -711,7 +1197,9 @@
                 function(prodotto) {
 
                     totale +=
-                        prodotto.quantitaFrigo;
+                        Number(
+                            prodotto.quantitaFrigo
+                        );
 
                 }
             );
@@ -756,13 +1244,17 @@
 
                             'src="' +
 
-                            prodotto.immagine +
+                            escapeHtml(
+                                prodotto.immagine
+                            ) +
 
                             '" ' +
 
                             'alt="' +
 
-                            prodotto.nome +
+                            escapeHtml(
+                                prodotto.nome
+                            ) +
 
                             '">';
 
@@ -785,7 +1277,9 @@
 
                         '<div class="nome-frigo">' +
 
-                        produtoNomeSeguro(prodotto.nome) +
+                        escapeHtml(
+                            prodotto.nome
+                        ) +
 
                         '</div>';
 
@@ -796,7 +1290,9 @@
 
                         '🏷️ ' +
 
-                        produtoNomeSeguro(prodotto.marca) +
+                        escapeHtml(
+                            prodotto.marca
+                        ) +
 
                         '</div>';
 
@@ -807,9 +1303,28 @@
 
                         '📦 Confezione: ' +
 
-                        produtoNomeSeguro(prodotto.quantita) +
+                        escapeHtml(
+                            prodotto.quantita
+                        ) +
 
                         '</div>';
+
+
+                    if (prodotto.categoria) {
+
+                        html +=
+
+                            '<div class="categoria-frigo">' +
+
+                            '🥫 ' +
+
+                            escapeHtml(
+                                prodotto.categoria
+                            ) +
+
+                            '</div>';
+
+                    }
 
 
                     html +=
@@ -937,47 +1452,104 @@
 
         /*
         ==================================================
-        SICUREZZA TESTO
-        ==================================================
-        */
-
-        function produtoNomeSeguro(testo) {
-
-            if (!testo) {
-
-                return "";
-
-            }
-
-            return String(testo)
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-
-        }
-
-
-        /*
-        ==================================================
         CAMBIA SCADENZA
         ==================================================
         */
 
-        function cambiaScadenza(
+        async function cambiaScadenza(
             indice,
             nuovaData
         ) {
 
 
-            frigo[indice].scadenza =
-                nuovaData;
+            const prodotto =
+                frigo[indice];
 
 
-            salvaFrigo();
+            if (!prodotto ||
+                !prodotto.id) {
 
-            mostraFrigo();
+                return;
+
+            }
+
+
+            try {
+
+
+                await supabaseFetch(
+
+                    SUPABASE_TABELLA +
+
+                    "?id=eq." +
+
+                    encodeURIComponent(
+                        prodotto.id
+                    ),
+
+                    {
+
+                        method:
+                            "PATCH",
+
+                        headers: {
+
+                            "Prefer":
+                                "return=minimal"
+
+                        },
+
+                        body:
+                            JSON.stringify({
+
+                                scadenza:
+                                    nuovaData ||
+                                    null,
+
+                                updated_at:
+                                    new Date()
+                                    .toISOString()
+
+                            })
+
+                    }
+
+                );
+
+
+                prodotto.scadenza =
+                    nuovaData;
+
+
+                mostraFrigo();
+
+
+                statoDatabase(
+                    "☁️ Scadenza aggiornata",
+                    true
+                );
+
+
+            }
+
+
+            catch (errore) {
+
+
+                console.error(
+                    errore
+                );
+
+
+                statoDatabase(
+                    "❌ Errore aggiornamento scadenza",
+                    false
+                );
+
+
+                await sincronizzaFrigo();
+
+            }
 
         }
 
@@ -988,64 +1560,203 @@
         ==================================================
         */
 
-        function aggiungiAlFrigo(
+        async function aggiungiAlFrigo(
             prodotto
         ) {
 
 
-            const esistente =
-                frigo.find(
-                    function(elemento) {
+            try {
 
-                        return elemento.codice ===
-                            prodotto.codice;
 
-                    }
+                const ricerca =
+                    await supabaseFetch(
+
+                        SUPABASE_TABELLA +
+
+                        "?codice=eq." +
+
+                        encodeURIComponent(
+                            prodotto.codice
+                        ) +
+
+                        "&select=*"
+
+                    );
+
+
+                if (
+                    ricerca &&
+                    ricerca.length > 0
+                ) {
+
+
+                    const esistente =
+                        ricerca[0];
+
+
+                    const nuovaQuantita =
+
+                        Number(
+                            esistente.quantita_frigo
+                        ) + 1;
+
+
+                    await supabaseFetch(
+
+                        SUPABASE_TABELLA +
+
+                        "?id=eq." +
+
+                        encodeURIComponent(
+                            esistente.id
+                        ),
+
+                        {
+
+                            method:
+                                "PATCH",
+
+                            headers: {
+
+                                "Prefer":
+                                    "return=minimal"
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    quantita_frigo:
+                                        novaQuantidadeSeguro(
+                                            nuovaQuantita
+                                        ),
+
+                                    updated_at:
+                                        new Date()
+                                        .toISOString()
+
+                                })
+
+                        }
+
+                    );
+
+                }
+
+                else {
+
+
+                    await supabaseFetch(
+
+                        SUPABASE_TABELLA,
+
+                        {
+
+                            method:
+                                "POST",
+
+                            headers: {
+
+                                "Prefer":
+                                    "return=minimal"
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    codice:
+                                        prodotto.codice,
+
+                                    nome:
+                                        prodotto.nome,
+
+                                    marca:
+                                        prodotto.marca,
+
+                                    quantita:
+                                        prodotto.quantita,
+
+                                    categoria:
+                                        prodotto.categoria,
+
+                                    immagine:
+                                        prodotto.immagine,
+
+                                    quantita_frigo:
+                                        1,
+
+                                    scadenza:
+                                        null
+
+                                })
+
+                        }
+
+                    );
+
+                }
+
+
+                await sincronizzaFrigo();
+
+
+                return true;
+
+
+            }
+
+
+            catch (errore) {
+
+
+                console.error(
+                    "Errore aggiunta prodotto:",
+                    errore
                 );
 
 
-            if (esistente) {
+                statoDatabase(
+                    "❌ Errore salvataggio prodotto",
+                    false
+                );
 
-                esistente.quantitaFrigo++;
 
-            }
-
-            else {
-
-                frigo.push({
-
-                    codice:
-                        prodotto.codice,
-
-                    nome:
-                        prodotto.nome,
-
-                    marca:
-                        prodotto.marca,
-
-                    quantita:
-                        prodotto.quantita,
-
-                    categoria:
-                        prodotto.categoria,
-
-                    immagine:
-                        prodotto.immagine,
-
-                    quantitaFrigo:
-                        1,
-
-                    scadenza:
-                        ""
-
-                });
+                return false;
 
             }
 
+        }
 
-            salvaFrigo();
 
-            mostraFrigo();
+        /*
+        ==================================================
+        SICUREZZA QUANTITÀ
+        ==================================================
+        */
+
+        function novaQuantidadeSeguro(
+            valore
+        ) {
+
+
+            const numero =
+                Number(valore);
+
+
+            if (
+                !Number.isFinite(numero) ||
+                numero < 1
+            ) {
+
+                return 1;
+
+            }
+
+
+            return Math.floor(
+                numero
+            );
 
         }
 
@@ -1056,13 +1767,94 @@
         ==================================================
         */
 
-        function aumenta(indice) {
+        async function aumenta(
+            indice
+        ) {
 
-            frigo[indice].quantitaFrigo++;
 
-            salvaFrigo();
+            const prodotto =
+                frigo[indice];
 
-            mostraFrigo();
+
+            if (!prodotto ||
+                !prodotto.id) {
+
+                return;
+
+            }
+
+
+            try {
+
+
+                const nuovaQuantita =
+
+                    Number(
+                        prodotto.quantitaFrigo
+                    ) + 1;
+
+
+                await supabaseFetch(
+
+                    SUPABASE_TABELLA +
+
+                    "?id=eq." +
+
+                    encodeURIComponent(
+                        prodotto.id
+                    ),
+
+                    {
+
+                        method:
+                            "PATCH",
+
+                        headers: {
+
+                            "Prefer":
+                                "return=minimal"
+
+                        },
+
+                        body:
+                            JSON.stringify({
+
+                                quantita_frigo:
+                                    novaQuantidadeSeguro(
+                                        nuovaQuantita
+                                    ),
+
+                                updated_at:
+                                    new Date()
+                                    .toISOString()
+
+                            })
+
+                    }
+
+                );
+
+
+                await sincronizzaFrigo();
+
+
+            }
+
+
+            catch (errore) {
+
+
+                console.error(
+                    errore
+                );
+
+
+                statoDatabase(
+                    "❌ Errore aumento quantità",
+                    false
+                );
+
+            }
 
         }
 
@@ -1073,30 +1865,123 @@
         ==================================================
         */
 
-        function diminuisci(indice) {
+        async function diminuisci(
+            indice
+        ) {
 
 
-            if (
-                frigo[indice].quantitaFrigo > 1
-            ) {
+            const prodotto =
+                frigo[indice];
 
-                frigo[indice].quantitaFrigo--;
+
+            if (!prodotto ||
+                !prodotto.id) {
+
+                return;
 
             }
 
-            else {
 
-                frigo.splice(
-                    indice,
-                    1
+            try {
+
+
+                const quantitaAttuale =
+                    Number(
+                        prodotto.quantitaFrigo
+                    );
+
+
+                if (
+                    quantitaAttuale > 1
+                ) {
+
+
+                    await supabaseFetch(
+
+                        SUPABASE_TABELLA +
+
+                        "?id=eq." +
+
+                        encodeURIComponent(
+                            prodotto.id
+                        ),
+
+                        {
+
+                            method:
+                                "PATCH",
+
+                            headers: {
+
+                                "Prefer":
+                                    "return=minimal"
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    quantita_frigo:
+
+                                        quantitaAttuale - 1,
+
+                                    updated_at:
+                                        new Date()
+                                        .toISOString()
+
+                                })
+
+                        }
+
+                    );
+
+                }
+
+                else {
+
+
+                    await supabaseFetch(
+
+                        SUPABASE_TABELLA +
+
+                        "?id=eq." +
+
+                        encodeURIComponent(
+                            prodotto.id
+                        ),
+
+                        {
+
+                            method:
+                                "DELETE"
+
+                        }
+
+                    );
+
+                }
+
+
+                await sincronizzaFrigo();
+
+
+            }
+
+
+            catch (errore) {
+
+
+                console.error(
+                    errore
+                );
+
+
+                statoDatabase(
+                    "❌ Errore diminuzione quantità",
+                    false
                 );
 
             }
-
-
-            salvaFrigo();
-
-            mostraFrigo();
 
         }
 
@@ -1107,23 +1992,405 @@
         ==================================================
         */
 
-        function elimina(indice) {
+        async function elimina(
+            indice
+        ) {
 
-            frigo.splice(
-                indice,
-                1
-            );
 
-            salvaFrigo();
+            const prodotto =
+                frigo[indice];
 
-            mostraFrigo();
+
+            if (!prodotto ||
+                !prodotto.id) {
+
+                return;
+
+            }
+
+
+            try {
+
+
+                await supabaseFetch(
+
+                    SUPABASE_TABELLA +
+
+                    "?id=eq." +
+
+                    encodeURIComponent(
+                        prodotto.id
+                    ),
+
+                    {
+
+                        method:
+                            "DELETE"
+
+                    }
+
+                );
+
+
+                await sincronizzaFrigo();
+
+
+            }
+
+
+            catch (errore) {
+
+
+                console.error(
+                    errore
+                );
+
+
+                statoDatabase(
+                    "❌ Errore eliminazione prodotto",
+                    false
+                );
+
+            }
 
         }
 
 
         /*
         ==================================================
-        INVIA FRIGO A TELEGRAM
+        IMPORTAZIONE VECCHIO FRIGO
+        ==================================================
+        */
+
+        function controllaImportazioneLocale() {
+
+
+            const datiLocali =
+                localStorage.getItem(
+                    "frigoFamiglia"
+                );
+
+
+            if (!datiLocali) {
+
+                return;
+
+            }
+
+
+            let locale;
+
+
+            try {
+
+                locale =
+                    JSON.parse(
+                        datiLocali
+                    );
+
+            }
+
+            catch {
+
+                return;
+
+            }
+
+
+            if (
+                !Array.isArray(locale) ||
+                locale.length === 0
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+            Se il database è vuoto,
+            mostriamo il pulsante.
+            */
+
+            if (
+                frigo.length === 0
+            ) {
+
+                document.getElementById(
+                    "importaButton"
+                ).style.display =
+                    "block";
+
+            }
+
+        }
+
+
+        /*
+        ==================================================
+        IMPORTA FRIGO LOCALE
+        ==================================================
+        */
+
+        async function importaFrigoLocale() {
+
+
+            const datiLocali =
+                localStorage.getItem(
+                    "frigoFamiglia"
+                );
+
+
+            if (!datiLocali) {
+
+                return;
+
+            }
+
+
+            let locale;
+
+
+            try {
+
+                locale =
+                    JSON.parse(
+                        datiLocali
+                    );
+
+            }
+
+            catch {
+
+                alert(
+                    "❌ Impossibile leggere il vecchio frigo."
+                );
+
+                return;
+
+            }
+
+
+            if (
+                !Array.isArray(locale) ||
+                locale.length === 0
+            ) {
+
+                alert(
+                    "🧊 Nessun prodotto locale da importare."
+                );
+
+                return;
+
+            }
+
+
+            const conferma =
+                confirm(
+
+                    "Ho trovato " +
+                    locale.length +
+                    " prodotti nel vecchio frigo.\n\n" +
+
+                    "Vuoi importarli nel Frigo Famiglia condiviso?"
+
+                );
+
+
+            if (!conferma) {
+
+                return;
+
+            }
+
+
+            statoDatabase(
+                "📥 Importazione del vecchio frigo...",
+                true
+            );
+
+
+            try {
+
+
+                for (
+                    const prodotto of locale
+                ) {
+
+
+                    const ricerca =
+                        await supabaseFetch(
+
+                            SUPABASE_TABELLA +
+
+                            "?codice=eq." +
+
+                            encodeURIComponent(
+                                prodotto.codice
+                            ) +
+
+                            "&select=*"
+
+                        );
+
+
+                    if (
+                        ricerca &&
+                        ricerca.length > 0
+                    ) {
+
+
+                        const esistente =
+                            ricerca[0];
+
+
+                        await supabaseFetch(
+
+                            SUPABASE_TABELLA +
+
+                            "?id=eq." +
+
+                            encodeURIComponent(
+                                esistente.id
+                            ),
+
+                            {
+
+                                method:
+                                    "PATCH",
+
+                                headers: {
+
+                                    "Prefer":
+                                        "return=minimal"
+
+                                },
+
+                                body:
+                                    JSON.stringify({
+
+                                        quantita_frigo:
+
+                                            Number(
+                                                esistente.quantita_frigo
+                                            ) +
+
+                                            Number(
+                                                prodotto.quantitaFrigo
+                                            ),
+
+                                        updated_at:
+                                            new Date()
+                                            .toISOString()
+
+                                    })
+
+                            }
+
+                        );
+
+                    }
+
+                    else {
+
+
+                        await supabaseFetch(
+
+                            SUPABASE_TABELLA,
+
+                            {
+
+                                method:
+                                    "POST",
+
+                                headers: {
+
+                                    "Prefer":
+                                        "return=minimal"
+
+                                },
+
+                                body:
+                                    JSON.stringify({
+
+                                        codice:
+                                            prodotto.codice,
+
+                                        nome:
+                                            prodotto.nome,
+
+                                        marca:
+                                            prodotto.marca,
+
+                                        quantita:
+                                            prodotto.quantita,
+
+                                        categoria:
+                                            prodotto.categoria,
+
+                                        immagine:
+                                            prodotto.immagine,
+
+                                        quantita_frigo:
+                                            novaQuantidadeSeguro(
+                                                prodotto.quantitaFrigo
+                                            ),
+
+                                        scadenza:
+                                            prodotto.scadenza ||
+                                            null
+
+                                    })
+
+                            }
+
+                        );
+
+                    }
+
+                }
+
+
+                await sincronizzaFrigo();
+
+
+                document.getElementById(
+                    "importaButton"
+                ).style.display =
+                    "none";
+
+
+                statoDatabase(
+                    "✅ Vecchio frigo importato nel database condiviso",
+                    true
+                );
+
+
+            }
+
+
+            catch (errore) {
+
+
+                console.error(
+                    "Errore importazione:",
+                    errore
+                );
+
+
+                statoDatabase(
+                    "❌ Errore durante importazione",
+                    false
+                );
+
+            }
+
+        }
+
+
+        /*
+        ==================================================
+        TELEGRAM
         ==================================================
         */
 
@@ -1136,7 +2403,9 @@
                 );
 
 
-            if (frigo.length === 0) {
+            if (
+                frigo.length === 0
+            ) {
 
                 risultato.innerText =
                     "🧊 Il frigo è vuoto.";
@@ -1274,7 +2543,7 @@
 
 
                 risultato.innerText =
-                    "✅ Frigo inviato a Telegram!";
+                    "✅ Frigo inviato al gruppo famiglia!";
 
 
             }
@@ -1452,7 +2721,9 @@
 
                 '<strong>' +
 
-                decodedText +
+                escapeHtml(
+                    decodedText
+                ) +
 
                 '</strong>' +
 
@@ -1593,7 +2864,9 @@
 
                         'Codice: ' +
 
-                        codigoSeguro(codice) +
+                        escapeHtml(
+                            codice
+                        ) +
 
                         '</div>';
 
@@ -1672,34 +2945,56 @@
 
 
                 /*
-                AGGIUNGI AUTOMATICAMENTE AL FRIGO
+                ==================================================
+                SALVATAGGIO DIRETTO SU SUPABASE
+                ==================================================
                 */
 
-                aggiungiAlFrigo({
+                const salvato =
+                    await aggiungiAlFrigo({
 
-                    codice:
-                        codice,
+                        codice:
+                            codice,
 
-                    nome:
-                        nome,
+                        nome:
+                            nome,
 
-                    marca:
-                        marca,
+                        marca:
+                            marca,
 
-                    quantita:
-                        quantita,
+                        quantita:
+                            quantita,
 
-                    categoria:
-                        categoria,
+                        categoria:
+                            categoria,
 
-                    immagine:
-                        immagine
+                        immagine:
+                            immagine
 
-                });
+                    });
+
+
+                if (!salvato) {
+
+                    contenitore.innerHTML =
+
+                        '<div class="errore">' +
+
+                        '❌ Prodotto trovato, ma non è stato possibile salvarlo nel frigo condiviso.' +
+
+                        '</div>';
+
+                    mostraPulsante();
+
+                    return;
+
+                }
 
 
                 /*
-                MOSTRA RISULTATO
+                ==================================================
+                RISULTATO
+                ==================================================
                 */
 
                 let html = "";
@@ -1720,7 +3015,9 @@
 
                     '🛒 ' +
 
-                    produtoNomeSeguro(nome) +
+                    escapeHtml(
+                        nome
+                    ) +
 
                     '</div>';
 
@@ -1731,7 +3028,9 @@
 
                     '🏷️ ' +
 
-                    produtoNomeSeguro(marca) +
+                    escapeHtml(
+                        marca
+                    ) +
 
                     '</div>';
 
@@ -1742,7 +3041,9 @@
 
                     '📦 Confezione: ' +
 
-                    produtoNomeSeguro(quantita) +
+                    escapeHtml(
+                        quantita
+                    ) +
 
                     '</div>';
 
@@ -1753,7 +3054,9 @@
 
                     '🥫 Categoria: ' +
 
-                    produtoNomeSeguro(categoria) +
+                    escapeHtml(
+                        categoria
+                    ) +
 
                     '</div>';
 
@@ -1764,7 +3067,9 @@
 
                     '🔢 Codice: ' +
 
-                    codigoSeguro(codice) +
+                    escapeHtml(
+                        codice
+                    ) +
 
                     '</div>';
 
@@ -1773,7 +3078,7 @@
 
                     '<div class="aggiunto">' +
 
-                    '🧊 AGGIUNTO AL FRIGO ✅' +
+                    '🧊 AGGIUNTO AL FRIGO CONDIVISO ✅' +
 
                     '</div>';
 
@@ -1784,13 +3089,17 @@
 
                         '<img src="' +
 
-                        immagine +
+                        escapeHtml(
+                            immagine
+                        ) +
 
                         '" ' +
 
                         'alt="' +
 
-                        produtoNomeSeguro(nome) +
+                        escapeHtml(
+                            nome
+                        ) +
 
                         '">';
 
@@ -1802,6 +3111,7 @@
 
 
                 mostraPulsante();
+
 
             }
 
@@ -1819,11 +3129,13 @@
 
                     '<div class="errore">' +
 
-                    '⚠️ Errore durante la ricerca' +
+                    '⚠️ Errore durante la pesquisa do produto' +
 
                     '<br><br>' +
 
-                    errore.message +
+                    escapeHtml(
+                        errore.message
+                    ) +
 
                     '</div>';
 
@@ -1831,24 +3143,6 @@
                 mostraPulsante();
 
             }
-
-        }
-
-
-        /*
-        ==================================================
-        SICUREZZA CODICE
-        ==================================================
-        */
-
-        function codigoSeguro(testo) {
-
-            return String(testo)
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
 
         }
 
@@ -1919,9 +3213,45 @@
         ==================================================
         */
 
-        mostraFrigo();
+        async function avviaApplicazione() {
 
-        avviaScanner();
+
+            /*
+            Prima carichiamo il database.
+            */
+
+            await caricaFrigo();
+
+
+            /*
+            Poi avviamo lo scanner.
+            */
+
+            avviaScanner();
+
+
+            /*
+            Ogni 5 secondi controlliamo
+            se qualcuno della famiglia
+            ha modificato il frigo.
+
+            */
+
+            setInterval(
+                sincronizzaFrigo,
+                5000
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        PARTENZA
+        ==================================================
+        */
+
+        avviaApplicazione();
 
 
     </script>
