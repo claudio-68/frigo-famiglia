@@ -356,6 +356,53 @@
         }
 
         /* =========================
+           SEZIONI FRIGO / DISPENSA
+           ========================= */
+
+        .sezioni-frigo {
+            max-width: 900px;
+            margin: 35px auto 0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .sezione-button {
+            flex: 1;
+            background: #e0e0e0;
+            color: #222;
+            padding: 14px;
+            font-size: 18px;
+        }
+
+        .sezione-button.attiva {
+            background: #1976d2;
+            color: white;
+        }
+
+        .scelta-ubicazione {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .scelta-ubicazione button {
+            min-width: 140px;
+            padding: 13px 18px;
+        }
+
+        .ubicazione-frigo {
+            background: #1976d2;
+            color: white;
+        }
+
+        .ubicazione-dispensa {
+            background: #7b1fa2;
+            color: white;
+        }
+
+                /* =========================
            FRIGO VUOTO
            ========================= */
 
@@ -520,6 +567,18 @@
          FRIGORIFERO
          ========================= -->
 
+    <div class="sezioni-frigo">
+        <button id="tabFrigo" class="sezione-button attiva"
+                onclick="cambiaSezione('frigo')">
+            🧊 Frigo
+        </button>
+
+        <button id="tabDispensa" class="sezione-button"
+                onclick="cambiaSezione('dispensa')">
+            🏠 Dispensa
+        </button>
+    </div>
+
     <div id="frigo">
 
         <div class="titolo-frigo">
@@ -593,6 +652,10 @@
         */
 
         let frigo = [];
+
+        let sezioneAttiva = "frigo";
+
+        let ubicazioneScelta = "frigo";
 
 
         /*
@@ -815,7 +878,10 @@
                     ),
 
                 scadenza:
-                    prodotto.scadenza || ""
+                    prodotto.scadenza || "",
+
+                ubicazione:
+                    prodotto.ubicazione || "frigo"
 
             };
 
@@ -1096,7 +1162,113 @@
         ==================================================
         */
 
-        function mostraFrigo() {
+        function cambiaSezione(sezione) {
+
+            sezioneAttiva = sezione;
+
+            document.getElementById("tabFrigo").classList.toggle(
+                "attiva",
+                sezione === "frigo"
+            );
+
+            document.getElementById("tabDispensa").classList.toggle(
+                "attiva",
+                sezione === "dispensa"
+            );
+
+            mostraFrigo();
+        }
+
+
+        function suggerisciUbicazione(categoria, nome) {
+
+            const testo =
+                ((categoria || "") + " " + (nome || "")).toLowerCase();
+
+            const paroleFrigo = [
+                "latte", "yogurt", "formaggio", "mozzarella",
+                "burro", "panna", "ricotta", "prosciutto",
+                "salame", "affettat", "carne", "pollo", "pesce",
+                "salmone", "surgelat", "fresco"
+            ];
+
+            return paroleFrigo.some(
+                parola => testo.includes(parola)
+            ) ? "frigo" : "dispensa";
+        }
+
+
+        function scegliUbicazione(ubicazione) {
+
+            ubicazioneScelta = ubicazione;
+
+            const contenitore =
+                document.getElementById("prodotto");
+
+            contenitore
+                .querySelectorAll(".scelta-ubicazione button")
+                .forEach(button => {
+                    button.disabled = false;
+                });
+
+            const selezionato =
+                contenitore.querySelector(
+                    '[data-ubicazione="' + ubicazione + '"]'
+                );
+
+            if (selezionato) {
+                selezionato.disabled = true;
+            }
+        }
+
+
+        async function confermaUbicazione() {
+
+            const contenitore =
+                document.getElementById("prodotto");
+
+            const prodotto =
+                JSON.parse(
+                    contenitore.dataset.prodotto
+                );
+
+            const salvato =
+                await aggiungiAlFrigo({
+                    ...prodotto,
+                    ubicazione: ubicazioneScelta
+                });
+
+            if (!salvato) {
+
+                contenitore.innerHTML =
+                    '<div class="errore">' +
+                    '❌ Impossibile salvare il prodotto.' +
+                    '</div>';
+
+                mostraPulsante();
+                return;
+            }
+
+            await inviaFrigoTelegram();
+
+            contenitore.innerHTML =
+                '<div class="successo">✅ PRODOTTO AGGIUNTO!</div>' +
+
+                '<div class="nome-prodotto">' +
+                '🛒 ' + escapeHtml(prodotto.nome) +
+                '</div>' +
+
+                '<div class="aggiunto">' +
+                (ubicazioneScelta === "frigo"
+                    ? "🧊 Aggiunto al Frigo"
+                    : "🏠 Aggiunto alla Dispensa") +
+                '</div>';
+
+            mostraPulsante();
+        }
+
+
+                function mostraFrigo() {
 
             const lista =
                 document.getElementById(
@@ -1110,8 +1282,14 @@
                 );
 
 
+            const frigoSezione =
+                frigo.filter(
+                    prodotto =>
+                        (prodotto.ubicazione || "frigo") === sezioneAttiva
+                );
+
             if (
-                frigo.length === 0
+                frigoSezione.length === 0
             ) {
 
                 contatore.innerText =
@@ -1153,7 +1331,7 @@
 
             contatore.innerText =
 
-                frigo.length +
+                frigoSezione.length +
 
                 " prodotti diversi • " +
 
@@ -1165,11 +1343,13 @@
             let html = "";
 
 
-            frigo.forEach(
+            frigoSezione.forEach(
                 function(
-                    prodotto,
-                    indice
+                    prodotto
                 ) {
+
+                    const indice =
+                        frigo.indexOf(prodotto);
 
 
                     const stato =
@@ -1493,6 +1673,12 @@
                             prodotto.codice
                         ) +
 
+                        "&ubicazione=eq." +
+
+                        encodeURIComponent(
+                            prodotto.ubicazione || "frigo"
+                        ) +
+
                         "&select=*"
 
                     );
@@ -1604,7 +1790,10 @@
                                         1,
 
                                     scadenza:
-                                        null
+                                        null,
+
+                                    ubicazione:
+                                        prodotto.ubicazione || "frigo"
 
                                 })
 
@@ -2386,71 +2575,82 @@
 
 
             let messaggio =
-                "🧊 FRIGO FAMIGLIA\n\n";
+                "🧊 FRIGO FAMIGLIA
 
+";
 
-            messaggio +=
-                "📦 Prodotti presenti:\n\n";
+            const sezioni = [
+                {
+                    nome: "🧊 FRIGO",
+                    ubicazione: "frigo"
+                },
+                {
+                    nome: "🏠 DISPENSA",
+                    ubicazione: "dispensa"
+                }
+            ];
 
+            for (const sezione of sezioni) {
 
-            frigo.forEach(
-                function(
-                    prodotto,
-                    indice
-                ) {
+                const prodottiSezione =
+                    frigo.filter(
+                        prodotto =>
+                            (prodotto.ubicazione || "frigo") ===
+                            sezione.ubicazione
+                    );
 
+                messaggio +=
+                    sezione.nome + "
 
-                    messaggio +=
+";
 
-                        (indice + 1) +
-                        ". " +
-                        prodotto.nome +
-                        "\n";
-
-
-                    messaggio +=
-
-                        "🏷️ " +
-                        prodotto.marca +
-                        "\n";
-
-
-                    messaggio +=
-
-                        "📦 " +
-                        prodotto.quantita +
-                        "\n";
-
+                if (prodottiSezione.length === 0) {
 
                     messaggio +=
+                        "Nessun prodotto
 
-                        "🧊 Quantità: " +
-                        prodotto.quantitaFrigo +
-                        "\n";
+";
 
+                    continue;
+                }
 
-                    if (
-                        prodotto.scadenza
-                    ) {
+                prodottiSezione.forEach(
+                    function(prodotto, indice) {
 
                         messaggio +=
+                            (indice + 1) + ". " +
+                            prodotto.nome + "
+";
 
-                            "📅 Scadenza: " +
+                        messaggio +=
+                            "🏷️ " +
+                            prodotto.marca + "
+";
 
-                            formattaData(
-                                prodotto.scadenza
-                            ) +
+                        messaggio +=
+                            "📦 " +
+                            prodotto.quantita + "
+";
 
-                            "\n";
+                        messaggio +=
+                            "🔢 Quantità: " +
+                            prodotto.quantitaFrigo + "
+";
 
+                        if (prodotto.scadenza) {
+
+                            messaggio +=
+                                "📅 Scadenza: " +
+                                formattaData(prodotto.scadenza) +
+                                "
+";
+                        }
+
+                        messaggio += "
+";
                     }
-
-
-                    messaggio +=
-                        "\n";
-
-                }
-            );
+                );
+            }
 
 
             risultato.innerText =
@@ -2951,64 +3151,73 @@
 
 
                 /*
-                SALVA SU SUPABASE
+                SCELTA FRIGO / DISPENSA
                 */
 
-                const salvato =
-                    await aggiungiAlFrigo({
+                ubicazioneScelta =
+                    suggerisciUbicazione(
+                        categoria,
+                        nome
+                    );
 
-                        codice:
-                            codice,
-
-                        nome:
-                            nome,
-
-                        marca:
-                            marca,
-
-                        quantita:
-                            quantita,
-
-                        categoria:
-                            categoria,
-
-                        immagine:
-                            immagine
-
+                contenitore.dataset.prodotto =
+                    JSON.stringify({
+                        codice: codice,
+                        nome: nome,
+                        marca: marca,
+                        quantita: quantita,
+                        categoria: categoria,
+                        immagine: immagine
                     });
 
+                contenitore.innerHTML =
 
-                if (!salvato) {
+                    '<div class="successo">✅ PRODOTTO TROVATO!</div>' +
 
-                    contenitore.innerHTML =
+                    '<div class="nome-prodotto">' +
+                    '🛒 ' + escapeHtml(nome) +
+                    '</div>' +
 
-                        '<div class="errore">' +
+                    '<div class="dato">🏷️ ' +
+                    escapeHtml(marca) +
+                    '</div>' +
 
-                        '❌ Prodotto trovato ma impossibile salvarlo nel frigo condiviso.' +
+                    '<div class="dato">📦 Confezione: ' +
+                    escapeHtml(quantita) +
+                    '</div>' +
 
-                        '</div>';
+                    '<div class="dato">🥫 Categoria: ' +
+                    escapeHtml(categoria) +
+                    '</div>' +
 
+                    '<div class="dato">📍 Dove vuoi metterlo?</div>' +
 
-                    mostraPulsante();
+                    '<div class="scelta-ubicazione">' +
 
+                    '<button type="button" ' +
+                    'class="ubicazione-frigo" ' +
+                    'data-ubicazione="frigo" ' +
+                    'onclick="scegliUbicazione(\'frigo\')">' +
+                    '🧊 Frigo' +
+                    '</button>' +
 
-                    return;
+                    '<button type="button" ' +
+                    'class="ubicazione-dispensa" ' +
+                    'data-ubicazione="dispensa" ' +
+                    'onclick="scegliUbicazione(\'dispensa\')">' +
+                    '🏠 Dispensa' +
+                    '</button>' +
 
-                }
+                    '</div>' +
 
+                    '<button class="nuova-scansione" ' +
+                    'onclick="confermaUbicazione()">' +
+                    '✅ Conferma' +
+                    '</button>';
 
-                /*
-                INVIO AUTOMATICO TELEGRAM
+                scegliUbicazione(ubicazioneScelta);
 
-                Il prodotto è stato salvato su Supabase.
-                Ora inviamo automaticamente il frigo aggiornato
-                al gruppo famiglia.
-                */
-
-                await inviaFrigoTelegram();
-
-
-                /*
+                                /*
                 RISULTATO
                 */
 
