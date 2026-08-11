@@ -1185,16 +1185,37 @@
             const testo =
                 ((categoria || "") + " " + (nome || "")).toLowerCase();
 
+            /*
+             * Prodotti normalmente da frigorifero.
+             * Le uova non vengono forzate nel frigo.
+             */
             const paroleFrigo = [
-                "latte", "yogurt", "formaggio", "mozzarella",
-                "burro", "panna", "ricotta", "prosciutto",
-                "salame", "affettat", "carne", "pollo", "pesce",
-                "salmone", "surgelat", "fresco"
+                "latte", "milk",
+                "yogurt", "formaggio", "cheese",
+                "mozzarella", "ricotta", "mascarpone",
+                "panna", "burro", "butter",
+                "prosciutto", "salame", "mortadella",
+                "affettat", "bresaola",
+                "carne", "pollo", "tacchino",
+                "pesce", "salmone",
+                "surgelat", "frozen",
+                "fresco", "fresh",
+                "refrigerat", "refrigerated"
             ];
 
-            return paroleFrigo.some(
-                parola => testo.includes(parola)
-            ) ? "frigo" : "dispensa";
+            /*
+             * Se non è riconosciuto come prodotto da frigo,
+             * va automaticamente in Dispensa.
+             */
+            if (
+                paroleFrigo.some(
+                    parola => testo.includes(parola)
+                )
+            ) {
+                return "frigo";
+            }
+
+            return "dispensa";
         }
 
 
@@ -1300,7 +1321,11 @@
 
                     '<div class="frigo-vuoto">' +
 
-                    '🧊 Il frigorifero è vuoto.' +
+                    (
+                        sezioneAttiva === "frigo"
+                            ? '🧊 Il frigorifero è vuoto.'
+                            : '🏠 La dispensa è vuota.'
+                    ) +
 
                     '<br><br>' +
 
@@ -1317,7 +1342,7 @@
             let totale = 0;
 
 
-            frigo.forEach(
+            frigoSezione.forEach(
                 function(prodotto) {
 
                     totale +=
@@ -1487,7 +1512,11 @@
 
                         '<div class="quantita-frigo">' +
 
-                        '🧊 Quantità nel frigo: ' +
+                        (
+                            sezioneAttiva === "frigo"
+                                ? '🧊 Quantità nel frigo: '
+                                : '🏠 Quantità in dispensa: '
+                        ) +
 
                         prodottoNumero(
                             prodotto.quantitaFrigo
@@ -3139,7 +3168,13 @@
 
 
                 /*
-                SCELTA FRIGO / DISPENSA
+                DESTINAZIONE AUTOMATICA
+
+                Il programma decide automaticamente:
+                - prodotti freschi/refrigerati -> Frigo
+                - gli altri prodotti -> Dispensa
+
+                Poi salva subito su Supabase.
                 */
 
                 ubicazioneScelta =
@@ -3148,62 +3183,46 @@
                         nome
                     );
 
-                contenitore.dataset.prodotto =
-                    JSON.stringify({
+                const salvato =
+                    await aggiungiAlFrigo({
+
                         codice: codice,
+
                         nome: nome,
+
                         marca: marca,
+
                         quantita: quantita,
+
                         categoria: categoria,
-                        immagine: immagine
+
+                        immagine: immagine,
+
+                        ubicazione: ubicazioneScelta
+
                     });
 
-                contenitore.innerHTML =
+                if (!salvato) {
 
-                    '<div class="successo">✅ PRODOTTO TROVATO!</div>' +
+                    contenitore.innerHTML =
 
-                    '<div class="nome-prodotto">' +
-                    '🛒 ' + escapeHtml(nome) +
-                    '</div>' +
+                        '<div class="errore">' +
 
-                    '<div class="dato">🏷️ ' +
-                    escapeHtml(marca) +
-                    '</div>' +
+                        '❌ Prodotto trovato ma impossibile salvarlo.' +
 
-                    '<div class="dato">📦 Confezione: ' +
-                    escapeHtml(quantita) +
-                    '</div>' +
+                        '</div>';
 
-                    '<div class="dato">🥫 Categoria: ' +
-                    escapeHtml(categoria) +
-                    '</div>' +
+                    mostraPulsante();
 
-                    '<div class="dato">📍 Dove vuoi metterlo?</div>' +
+                    return;
 
-                    '<div class="scelta-ubicazione">' +
+                }
 
-                    '<button type="button" ' +
-                    'class="ubicazione-frigo" ' +
-                    'data-ubicazione="frigo" ' +
-                    'onclick="scegliUbicazione(\'frigo\')">' +
-                    '🧊 Frigo' +
-                    '</button>' +
+                /*
+                Invio automatico Telegram dopo il salvataggio.
+                */
 
-                    '<button type="button" ' +
-                    'class="ubicazione-dispensa" ' +
-                    'data-ubicazione="dispensa" ' +
-                    'onclick="scegliUbicazione(\'dispensa\')">' +
-                    '🏠 Dispensa' +
-                    '</button>' +
-
-                    '</div>' +
-
-                    '<button class="nuova-scansione" ' +
-                    'onclick="confermaUbicazione()">' +
-                    '✅ Conferma' +
-                    '</button>';
-
-                scegliUbicazione(ubicazioneScelta);
+                await inviaFrigoTelegram();
 
                                 /*
                 RISULTATO
@@ -3290,7 +3309,11 @@
 
                     '<div class="aggiunto">' +
 
-                    '🧊 AGGIUNTO AL FRIGO FAMIGLIA ✅' +
+                    (
+                        ubicazioneScelta === "frigo"
+                            ? '🧊 AGGIUNTO AL FRIGO FAMIGLIA ✅'
+                            : '🏠 AGGIUNTO ALLA DISPENSA FAMIGLIA ✅'
+                    ) +
 
                     '</div>';
 
