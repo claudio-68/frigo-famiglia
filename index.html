@@ -2575,9 +2575,7 @@
 
 
             let messaggio =
-                "🧊 FRIGO FAMIGLIA
-
-";
+                "🧊 FRIGO FAMIGLIA\n\n";
 
             const sezioni = [
                 {
@@ -2600,16 +2598,12 @@
                     );
 
                 messaggio +=
-                    sezione.nome + "
-
-";
+                    sezione.nome + "\n\n";
 
                 if (prodottiSezione.length === 0) {
 
                     messaggio +=
-                        "Nessun prodotto
-
-";
+                        "Nessun prodotto\n\n";
 
                     continue;
                 }
@@ -2619,35 +2613,29 @@
 
                         messaggio +=
                             (indice + 1) + ". " +
-                            prodotto.nome + "
-";
+                            prodotto.nome + "\n";
 
                         messaggio +=
                             "🏷️ " +
-                            prodotto.marca + "
-";
+                            prodotto.marca + "\n";
 
                         messaggio +=
                             "📦 " +
-                            prodotto.quantita + "
-";
+                            prodotto.quantita + "\n";
 
                         messaggio +=
                             "🔢 Quantità: " +
-                            prodotto.quantitaFrigo + "
-";
+                            prodotto.quantitaFrigo + "\n";
 
                         if (prodotto.scadenza) {
 
                             messaggio +=
                                 "📅 Scadenza: " +
                                 formattaData(prodotto.scadenza) +
-                                "
-";
+                                "\n";
                         }
 
-                        messaggio += "
-";
+                        messaggio += "\n";
                     }
                 );
             }
